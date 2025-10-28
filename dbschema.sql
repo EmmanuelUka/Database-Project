@@ -50,4 +50,5 @@ create table takes{
 create table teaches{
     proffesor_ID varchar(10),
     section_ID varchar(10),
+    --
 }
