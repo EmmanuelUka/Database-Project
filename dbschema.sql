@@ -1,5 +1,4 @@
-create schema euka; --change schema username to yours
-use euka;
+use euka;--change schema username to yours
 
 create table student(    student_ID          varchar(10) primary key,
     s_name              varchar(25) not null,
