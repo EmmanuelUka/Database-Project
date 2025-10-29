@@ -1,5 +1,8 @@
 delete from classroom;
 
+
+
+--create proffessor
 insert into professor
 values('1273892037', 'James Evans', '1001', 100000, 'j.evans@kent.edu', '120', 'county road 12', 'toledo', 'ohio', 23495 );
 
@@ -14,3 +17,4 @@ VALUES ('4592038174', 'Emily Rivera', '1004', 91000, 'e.rivera@kent.edu', '18', 
 
 INSERT INTO professor
 VALUES ('5610283947', 'Michael Chen', '1005', 99000, 'm.chen@kent.edu', '300', 'Summit Avenue', 'Kent', 'Ohio', 44240);
+
