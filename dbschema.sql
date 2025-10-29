@@ -55,9 +55,9 @@ create table course(
     foreign key (department_ID) references department(department_ID)
 );
 
-create table clasroom(
+create table classroom(
     b_name varchar(25),
-    capacity numeric(c,0),
+    capacity varchar(3),
     room_number varchar(3),
     primary key (building_ID, room_number),
     foreign key (b_name) references building(b_name)
@@ -77,25 +77,28 @@ create table building (
 
 create table department(
     d_name varchar(25) not null,
-    building_ID varchar(10),
+    b_name varchar(10),
     budget numeric(9,2),
     department_ID varchar(4) primary key,
+    foreign key (b_name) references building(b_name)
 );
 
 create table takes(
     student_ID varchar(10),
-    section_ID varchar(10),
+    section_number varchar(10),
     letter varchar(1),
     check (letter in ('A', 'B', 'C', 'D', 'F'))
     primary key (student_ID, section_ID),
     foreign key (student_ID) references Student(student_ID),
-    foreign key (section_ID) references Section(section_ID)
+    foreign key (section_number) references Section(section_number)
 );
 
 create table teaches(
     proffesor_ID varchar(10),
-    section_ID varchar(10),
-    primary key (professor_ID, section_ID),
+    section_number varchar(10),
+    primary key (professor_ID, section_number),
     foreign key (professor_ID) references Professor(professor_ID),
-    foreign key (section_ID) references Section(section_ID)
+    foreign key (section_number references Section(section_number)
+);
+
 );
