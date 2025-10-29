@@ -8,26 +8,37 @@ delete from department;
 delete from takes;
 delete from teaches;
 
------Professor Data Inserts-----
+--create professor
 insert into professor
 values('1273892037', 'James Evans', '1001', 100000, 'j.evans@kent.edu', '120', 'county road 12', 'toledo', 'ohio', 23495 );
 
-INSERT INTO professor
-VALUES ('2384920183', 'Sarah Thompson', '1002', 87500, 's.thompson@kent.edu', '45', 'Maple Street', 'Cleveland', 'Ohio', 44114);
+insert into professor
+values ('2384920183', 'Sarah Thompson', '1002', 87500, 's.thompson@kent.edu', '45', 'Maple Street', 'Cleveland', 'Ohio', 44114);
 
-INSERT INTO professor
-VALUES ('3471829401', 'Robert Jenkins', '1003', 94500, 'r.jenkins@kent.edu', '210', 'Lakeview Drive', 'Akron', 'Ohio', 44308);
+insert into professor
+values ('3471829401', 'Robert Jenkins', '1003', 94500, 'r.jenkins@kent.edu', '210', 'Lakeview Drive', 'Akron', 'Ohio', 44308);
 
-INSERT INTO professor
-VALUES ('4592038174', 'Emily Rivera', '1004', 91000, 'e.rivera@kent.edu', '18', 'Sunset Blvd', 'Columbus', 'Ohio', 43215);
+insert into professor
+values ('4592038174', 'Emily Rivera', '1004', 91000, 'e.rivera@kent.edu', '18', 'Sunset Blvd', 'Columbus', 'Ohio', 43215);
 
-INSERT INTO professor
-VALUES ('5610283947', 'Michael Chen', '1005', 99000, 'm.chen@kent.edu', '300', 'Summit Avenue', 'Kent', 'Ohio', 44240);
+insert into professor
+values ('5610283947', 'Michael Chen', '1005', 99000, 'm.chen@kent.edu', '300', 'Summit Avenue', 'Kent', 'Ohio', 44240);
 
---delete proffessor
-delete from proffessor where professor_ID = '';
+--read: all professors
+select * from professor;
 
-------Student Data Inserts-----
+--read: individual professor
+select * from professor where ID ='';
+
+--update: change salary
+update professor
+set salary = ''
+where professor_ID = '';
+
+--delete professor
+delete from professor where professor_ID = '';
+
+--create student
 insert into student 
 values ('9515617924', 'Emmanuel Uka', '12', 3.95, 'emauka@gmail.com', '2000', 'Monster', 'Hell', 'Ohio', '12446');
 
@@ -43,33 +54,68 @@ values ('9515617927', 'sophia brown', '12', 4.00, 'sbrown@gmail.com', '230', 'el
 insert into student 
 values ('9515617928', 'noah patel', '9', 3.60, 'npatel@gmail.com', '678', 'sunset drive', 'willowtown', 'ny', '10027');
 
-------Course Data Inserts-----
+--read: all students
+select * from students
+
+--read: individual professor
+select * from professor where student_ID = '';
+
+--update: change GPA
+update student
+set GPA = ''
+where student_ID = '';
+
+--delete student
+delete from student where student_ID = '';
+
+--create course
 insert into course values('CS101', 'Introduction to Computer Science', '4', '1001');
 insert into course values('MATH201', 'Calculus I', '4', '1002');
 insert into course values('ENG150', 'English Literature', '3', '1003');
 insert into course values('HIST210', 'World History', '3', '1004');
 insert into course values('BIO110', 'General Biology', '4', '1005');
 
-------Department Data Inserts-----
-insert into classroom values ('Engineering Hall', '150', 'E101');
-insert into classroom values ('Math Center', '100', 'M202');
-insert into classroom values ('Humanities Building', '80', 'H303');
-insert into classroom values ('English Hall', '120', 'E404');
-insert into classroom values ('Life Science Center', '200', 'S505');
+--read: all courses
+select * from courses;
 
--------Teaches Data Inserts-----
-insert into teaches values('1273892037', 'CS101');
-insert into teaches values('2384920183', 'MATH201');
-insert into teaches values('3471829401', 'ENG150'); 
-insert into teaches values('4592038174', 'HIST210');
-insert into teaches values('5610283947', 'BIO110');
+--read: particular course
+select * from course where course_ID = '';
 
--------Section Data Inserts-----
-insert into section values('CS101', '1273892037','Fall', '2023', '001', 'E101');
-insert into section values('MATH201', '2384920183','Spring', '2024','002', 'M202');
-insert into section values('ENG150','3471829401','Fall', '2023','001', 'E404');    
-insert into section values('HIST210','4592038174','Spring', '2024','002', 'H303');
-insert into section values('BIO110','5610283947','Fall', '2023','001', 'S505');
+--update: change credit amount
+update course
+set credits = ''
+where course_ID = '';
+
+--delect course
+delete from course where course_ID = '';
+
+--create teaches
+insert into teaches values('1273892037', '001');
+insert into teaches values('2384920183', '002');
+insert into teaches values('3471829401', '003'); 
+insert into teaches values('4592038174', '004');
+insert into teaches values('5610283947', '005');
+
+---create Section
+insert into section values('CS101', '1273892037','Fall', '2023', '001', '101', 'M', '5:00', '75');
+insert into section values('MATH201', '2384920183','Spring', '2024','002', '202', 'T', '11:00', '30');
+insert into section values('ENG150','3471829401','Fall', '2023','003', '404', 'F', '4:00', '65');    
+insert into section values('HIST210','4592038174','Spring', '2024','004', '303', 'Th', '2:15', '110');
+insert into section values('BIO110','5610283947','Fall', '2023','005', '505', 'W', '12:30', '45');
+
+--read:all sections
+select * from section;
+
+--read: all sections of a course
+select * from section where course_ID = '';
+
+--update:time
+update section
+set time = ''
+where course_ID = '' & section_ID = '';
+
+--delete section
+delete from section where course_ID = '' & section_ID = '';
 
 --create department
 insert into department
@@ -87,6 +133,17 @@ VALUES ('English', 'Johnson Hall', 310000, 1004);
 insert into department
 VALUES ('Psychology', 'Anderson Hall', 460000, 1005);
 
+--read: all departments
+select * from department
+
+--read: particular department
+select * from department where department_ID = ''
+
+--update department: change budget
+update department 
+set budget = 0
+where department_ID = ''
+
 --delete department
 delete from department where department_ID = '';
 
@@ -98,9 +155,9 @@ insert into takes
 insert into takes
  values ('9515617926', '003', 'C');
 insert into takes
- values ('9515617927', '001', 'A');
+ values ('9515617927', '004', 'A');
 insert into takes
- values ('9515617928', '004', 'B');
+ values ('9515617928', '005', 'B');
 
  --delete takes
  delete from takes where student_ID = '' & section_number = ''
@@ -120,6 +177,17 @@ values ('1004', 'Johnson Hall', 2, 12, '75', 'Academy Lane', 'Kent', 'Ohio', 442
 
 insert into building 
 values ('1005', 'Anderson Hall', 4, 20, '460', 'Summit Street', 'Kent', 'Ohio', 44240);
+
+--read: all buildings
+select * from building
+
+--read: building in a particular department
+select * from building where department_ID = '';
+
+--update: change name
+update building
+set b_name = ''
+where b_name = ''
 
 --delete building
 delete from building where building_name = '';
