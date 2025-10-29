@@ -30,13 +30,12 @@ create table professor(
 );
 
 create table section(
-    section_ID              varchar(10) primary key,
     course_ID               varchar(10),
     professor_ID            varchar(10),
     semester                varchar(6)
 		check (semester in ('Fall', 'Winter', 'Spring', 'Summer')), 
     year			numeric(4,0) check (year > 1701 and year < 2100), 
-    section_number          varchar(3),
+    section_number          varchar(3) primary key,
     room_number    varchar(3),
     days           varchar(2)
 		check (semester in ('M', 'T', 'W', 'Th', 'F')),
