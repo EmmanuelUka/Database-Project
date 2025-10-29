@@ -1,7 +1,6 @@
 use euka;
---change to your username
 
--- buildings first
+
 create table building (
     b_name varchar(25) primary key,
     floor_count numeric(2,0),
