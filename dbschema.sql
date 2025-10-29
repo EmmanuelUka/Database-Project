@@ -57,7 +57,7 @@ create table course(
 
 create table clasroom(
     b_name varchar(25),
-    capacity numeric(c,0),
+    capacity varchar(3),
     room_number varchar(3),
     primary key (building_ID, room_number),
     foreign key (b_name) references building(b_name)
