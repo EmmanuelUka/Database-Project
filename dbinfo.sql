@@ -54,15 +54,15 @@ values ('9515617928', 'noah patel', '9', 3.60, 'npatel@gmail.com', '678', 'sunse
 select * from students
 
 
-select * from professor where student_ID = '';
+select * from professor where student_ID = '3471829401';
 
 
 update student
-set GPA = ''
-where student_ID = '';
+set GPA = '4.00'
+where student_ID = '9515617924';
 
 
-delete from student where student_ID = '';
+delete from student where student_ID = '9515617926';
 
 
 insert into course values('CS101', 'Introduction to Computer Science', '4', '1001');
@@ -75,15 +75,15 @@ insert into course values('BIO110', 'General Biology', '4', '1005');
 select * from courses;
 
 
-select * from course where course_ID = '';
+select * from course where course_ID = 'HIST210';
 
 
 update course
-set credits = ''
-where course_ID = '';
+set credits = '10'
+where course_ID = 'CS101';
 
 
-delete from course where course_ID = '';
+delete from course where course_ID = 'HIST210';
 
 
 insert into teaches values('1273892037', '001');
@@ -103,15 +103,15 @@ insert into section values('BIO110','5610283947','Fall', '2023','005', '505', 'W
 select * from section;
 
 
-select * from section where course_ID = '';
+select * from section where course_ID = 'ENG150';
 
 
 update section
-set time = ''
-where course_ID = '' & section_ID = '';
+set time = '4:00'
+where course_ID = 'ENG150' & section_ID = '003';
 
 
-delete from section where course_ID = '' & section_ID = '';
+delete from section where course_ID = 'BIO110' & section_ID = '005';
 
 
 insert into department
@@ -133,15 +133,15 @@ VALUES ('Psychology', 'Anderson Hall', 460000, 1005);
 select * from department
 
 
-select * from department where department_ID = ''
+select * from department where department_ID = 'computer science'
 
 
 update department 
 set budget = 0
-where department_ID = ''
+where department_ID = 'English'
 
 
-delete from department where department_ID = '';
+delete from department where department_ID = 'Psychology';
 
 
 insert into takes
@@ -156,34 +156,34 @@ insert into takes
  values ('9515617928', '005', 'B');
 
 
-delete from takes where student_ID = '' & section_number = ''
+delete from takes where student_ID = '9515617925' & section_number = '002'
 
 
 insert into building 
-values ('1001', 'Conner Hall', 4, 25, '120', 'University Ave', 'Kent', 'Ohio', 44240);
+values ('Conner Hall', 4, 25, '120', 'University Ave', 'Kent', 'Ohio', 44240);
 
 insert into building 
-values ('1002', 'Taylor Hall', 3, 18, '200', 'Main Street', 'Kent', 'Ohio', 44240);
+values ('Taylor Hall', 3, 18, '200', 'Main Street', 'Kent', 'Ohio', 44240);
 
 insert into building 
-values ('1003', 'Franklin Hall', 5, 30, '310', 'College Street', 'Kent', 'Ohio', 44240);
+values ('Franklin Hall', 5, 30, '310', 'College Street', 'Kent', 'Ohio', 44240);
 
 insert into building 
-values ('1004', 'Johnson Hall', 2, 12, '75', 'Academy Lane', 'Kent', 'Ohio', 44240);
+values ('Johnson Hall', 2, 12, '75', 'Academy Lane', 'Kent', 'Ohio', 44240);
 
 insert into building 
-values ('1005', 'Anderson Hall', 4, 20, '460', 'Summit Street', 'Kent', 'Ohio', 44240);
+values ('Anderson Hall', 4, 20, '460', 'Summit Street', 'Kent', 'Ohio', 44240);
 
 
 select * from building
 
 
-select * from building where department_ID = '';
+select * from building where department_ID = 'Psychology';
 
 
 update building
-set b_name = ''
-where b_name = ''
+set b_name = 'Olson Hall'
+where b_name = 'Anderson Hall'
 
 
-delete from building where building_name = '';
+delete from building where building_name = 'Johnson Hall';
