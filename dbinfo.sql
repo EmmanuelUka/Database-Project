@@ -1,4 +1,4 @@
-use euka
+use euka;
 
 delete from student;
 delete from professor;
