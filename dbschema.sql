@@ -88,7 +88,7 @@ create table takes (
     course_ID varchar(10),
     primary key (student_id, section_number),
     foreign key (student_id) references student(student_id),
-    foreign key (section_number) references section(section_number)
+    foreign key (section_number) references section(section_number),
     foreign key (course_id) references course(course_id)
 );
 
