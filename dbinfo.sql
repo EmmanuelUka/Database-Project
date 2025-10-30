@@ -1,6 +1,16 @@
 use euka;
+delete from takes;
+delete from teaches;    
+delete from section;
+delete from student;    
+delete from professor;
+delete from course;
+delete from department;
+delete from classroom;
+delete from building;
 
-insert into professor
+
+
 values('1273892037', 'James Evans', '1001', 100000, 'j.evans@kent.edu', '120', 'county road 12', 'toledo', 'ohio', 23495 );
 
 
