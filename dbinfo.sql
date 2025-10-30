@@ -51,11 +51,11 @@ insert into student values ('9515617927', 'sophia brown', 1004,'12', 4.00, 'sbro
 insert into student  values ('9515617928', 'noah patel', 1005,'9', 3.60, 'npatel@gmail.com', '678', 'sunset drive', 'willowtown', 'ny', '10027');
 
 
-insert into section values('CS101', '1273892037','Fall', '2023', '001', '101', 'M', '5:00', '75');
-insert into section values('MATH201', '2384920183','Spring', '2024','002', '202', 'T', '11:00', '30');
-insert into section values('ENG150','3471829401','Fall', '2023','003', '404', 'F', '4:00', '65');    
-insert into section values('HIST210','4592038174','Spring', '2024','004', '303', 'Th', '2:15', '110');
-insert into section values('BIO110','5610283947','Fall', '2023','005', '505', 'W', '12:30', '45');
+insert into section values('001', 'CS101', '1273892037','Fall', '2023','101', 'M', '5:00', '75');
+insert into section values('002', 'MATH201', '2384920183','Spring', '2024','002', '202', 'T', '11:00', '30');
+insert into section values('003', 'ENG150','3471829401','Fall', '2023','404', 'F', '4:00', '65');    
+insert into section values('004', 'HIST210','4592038174','Spring', '2024', '303', 'Th', '2:15', '110');
+insert into section values('005', 'BIO110','5610283947','Fall', '2023', '505', 'W', '12:30', '45');
 
 
 insert into teaches values('1273892037', '001');
