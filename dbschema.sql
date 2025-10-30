@@ -90,7 +90,7 @@ create table takes (
     primary key (student_id, section_number),
     foreign key (student_id) references student(student_id),
     foreign key (section_number) references section(section_number)
-    foreign key (course_ID) references course(course_ID)
+    foreign key (course_id) references course(course_id)
 );
 
 create table teaches (
@@ -100,5 +100,5 @@ create table teaches (
     primary key (professor_id, section_number),
     foreign key (professor_id) references professor(professor_id),
     foreign key (section_number) references section(section_number)
-    foreign key (course_ID) references course(course_ID)
+    foreign key (course_id) references course(course_id)
 );
