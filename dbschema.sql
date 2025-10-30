@@ -66,7 +66,7 @@ create table student (
 );
 
 create table section (
-    section_number varchar(3) primary key,
+    section_number varchar(10) primary key,
     course_id varchar(10),
     professor_id varchar(10),
     semester varchar(6) check (semester in ('Fall', 'Winter', 'Spring', 'Summer')),
