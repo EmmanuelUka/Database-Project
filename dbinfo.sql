@@ -44,11 +44,11 @@ insert into professor values ('4592038174', 'Emily Rivera', '1004', 91000, 'e.ri
 insert into professor values ('5610283947', 'Michael Chen', '1005', 99000, 'm.chen@kent.edu', '300', 'Summit Avenue', 'Kent', 'Ohio', 44240);
 
 
-insert into student values ('9515617924', 'Emmanuel Uka', '12', 3.95, 'emauka@gmail.com', '2000', 'Monster', 'Hell', 'Ohio', '12446');
-insert into student values ('9515617925', 'luna garcia', '11', 3.82, 'lgarcia@gmail.com', '400', 'starfall blvd', 'dreamvale', 'ca', '90210');
-insert into student  values ('9515617926', 'marcus lee', '10', 3.47, 'mlee@gmail.com', '872', 'maple street', 'riverton', 'tx', '75001');
-insert into student values ('9515617927', 'sophia brown', '12', 4.00, 'sbrown@gmail.com', '230', 'elm grove', 'silverlake', 'fl', '33101');
-insert into student  values ('9515617928', 'noah patel', '9', 3.60, 'npatel@gmail.com', '678', 'sunset drive', 'willowtown', 'ny', '10027');
+insert into student values ('9515617924', 'Emmanuel Uka', 1001, '12', 3.95, 'emauka@gmail.com', '2000', 'Monster', 'Hell', 'Ohio', '12446');
+insert into student values ('9515617925', 'luna garcia', 1002,'11', 3.82, 'lgarcia@gmail.com', '400', 'starfall blvd', 'dreamvale', 'ca', '90210');
+insert into student  values ('9515617926', 'marcus lee', 1003,'10', 3.47, 'mlee@gmail.com', '872', 'maple street', 'riverton', 'tx', '75001');
+insert into student values ('9515617927', 'sophia brown', 1004,'12', 4.00, 'sbrown@gmail.com', '230', 'elm grove', 'silverlake', 'fl', '33101');
+insert into student  values ('9515617928', 'noah patel', 1005,'9', 3.60, 'npatel@gmail.com', '678', 'sunset drive', 'willowtown', 'ny', '10027');
 
 
 insert into section values('CS101', '1273892037','Fall', '2023', '001', '101', 'M', '5:00', '75');
