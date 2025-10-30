@@ -95,9 +95,9 @@ create table takes (
 create table teaches (
     professor_id varchar(10),
     section_number varchar(3),
-    course_ID varcvhar(10),
+    course_ID varchar(10),
     primary key (professor_id, section_number),
     foreign key (professor_id) references professor(professor_id),
-    foreign key (section_number) references section(section_number)
+    foreign key (section_number) references section(section_number),
     foreign key (course_id) references course(course_id)
 );
