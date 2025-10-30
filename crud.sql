@@ -61,7 +61,7 @@ delete from course where course_ID = '';
 insert into teaches values('1273892037', '001');
 
 --delete takes
-delete from teaches where professor_ID = '' & section_number = '';
+delete from teaches where professor_ID = '' and section_number = '';
 
 
 
@@ -77,10 +77,10 @@ select * from section where course_ID = '';
 --update:time
 update section
 set time = ''
-where course_ID = '' & section_ID = '';
+where course_ID = '' and section_ID = '';
 
 --delete section
-delete from section where course_ID = '' & section_ID = '';
+delete from section where course_ID = '' and section_ID = '';
 
 
 
@@ -109,7 +109,7 @@ insert into takes
  values ('9515617924', '001', 'A');
 
  --delete takes
- delete from takes where student_ID = '' & section_number = ''
+ delete from takes where student_ID = '' and section_number = ''
 
 
 
@@ -146,7 +146,40 @@ select * from classroom where b_name = '';
 --update: seat count
 update classroom
 set capacity = ''
-where b_name = '' & room_number = '';
+where b_name = '' and room_number = '';
 
 --delete classroom
-delete from classroom where b_name = '' & room_number = '';
+delete from classroom where b_name = '' and room_number = '';
+
+
+
+--enroll in class
+insert into takes
+values('9515617924', '001', null, 'CS101')
+
+
+
+--assign an instructor to a class
+insert into teaches
+values('1273892037', '001', 'CS101')
+
+
+
+--drop a section
+delete from takes
+where section_number = '001' and course_ID = 'CS101';
+
+delete from teaches
+where section_number = '001' and course_ID = 'CS101';
+
+delete from section
+where section_number = '001' and course_ID = 'CS101';
+
+
+
+--give a grade to a student in a section
+update takes
+set letter = 'A'
+where student_id = '9515617924' 
+  and section_number = '001'
+  and course_ID = 'cs101';

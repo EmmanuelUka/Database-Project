@@ -85,16 +85,20 @@ create table takes (
     student_id varchar(10),
     section_number varchar(3),
     letter varchar(1),
+    course_ID varchar(10),
     check (letter in ('A', 'B', 'C', 'D', 'F')),
     primary key (student_id, section_number),
     foreign key (student_id) references student(student_id),
     foreign key (section_number) references section(section_number)
+    foreign key (course_ID) references course(course_ID)
 );
 
 create table teaches (
     professor_id varchar(10),
     section_number varchar(3),
+    course_ID varcvhar(10),
     primary key (professor_id, section_number),
     foreign key (professor_id) references professor(professor_id),
     foreign key (section_number) references section(section_number)
+    foreign key (course_ID) references course(course_ID)
 );
