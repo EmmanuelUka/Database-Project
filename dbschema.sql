@@ -84,9 +84,8 @@ create table section (
 create table takes (
     student_id varchar(10),
     section_number varchar(3),
-    letter varchar(1),
+    letter varchar(1) check (letter in ('A', 'B', 'C', 'D', 'F')),
     course_ID varchar(10),
-    check (letter in ('A', 'B', 'C', 'D', 'F')),
     primary key (student_id, section_number),
     foreign key (student_id) references student(student_id),
     foreign key (section_number) references section(section_number)
