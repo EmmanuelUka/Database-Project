@@ -26,7 +26,7 @@ insert into classroom values ('Anderson Hall', '505', 35);
 insert into department values(1001, 'computer science', 'conner hall', 500000);
 insert into department values (1002, 'Mathematics', 'Taylor Hall', 420000);
 insert into department values (1003, 'History', 'Franklin Hall', 380000);
-insert into department values (1004, 'English', 'Johnson Hall', 310000, );
+insert into department values (1004, 'English', 'Johnson Hall', 310000);
 insert into department values (1005, 'Life Sciences', 'Anderson Hall', 460000);
 
 
