@@ -70,3 +70,19 @@ insert into takes values ('9515617925', '002', 'B', 'MATH201');
 insert into takes values ('9515617926', '003', 'C', 'ENG150');
 insert into takes values ('9515617927', '004', 'A', 'HIST210');
 insert into takes values ('9515617928', '005', 'B', 'BIO110');
+
+
+INSERT INTO users VALUES ('A0001', 'Zac Evans', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'admin');
+INSERT INTO users VALUES ('A0001', 'Emmanuel Uka', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'admin');
+
+INSERT INTO users VALUES ('1273892037', 'James Evans', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+INSERT INTO users VALUES ('2384920183', 'Sarah Thompson', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+INSERT INTO users VALUES ('3471829401', 'Robert Jenkins', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+INSERT INTO users VALUES ('4592038174', 'Emily Rivera', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+INSERT INTO users VALUES ('5610283947', 'Michael Chen', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+
+INSERT INTO users VALUES ('9515617924', 'Emmanuel Uka', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
+INSERT INTO users VALUES ('9515617925', 'Luna Garcia', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
+INSERT INTO users VALUES ('9515617926', 'Marcus Lee', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
+INSERT INTO users VALUES ('9515617927', 'Sophia Brown', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
+INSERT INTO users VALUES ('9515617928', 'Noah Patel', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');

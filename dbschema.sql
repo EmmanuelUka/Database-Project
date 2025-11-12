@@ -101,3 +101,12 @@ create table teaches (
     foreign key (section_number) references section(section_number),
     foreign key (course_id) references course(course_id)
 );
+
+create table users (
+    user_id varchar(10) primary key,
+    username varchar(25) unique not null,
+    password varchar(255) not null,
+    role enum('admin', 'instructor', 'student') not null,
+    foreign key (user_id) references student(student_id) on delete cascade,
+    foreign key (user_id) references professor(professor_id) on delete cascade
+);
