@@ -1,4 +1,4 @@
-use euka;
+use project;
 
 
 create table building (
@@ -36,6 +36,13 @@ create table course (
     foreign key (department_id) references department(department_id)
 );
 
+create table users (
+    user_id varchar(10) primary key,
+    username varchar(25) unique not null,
+    password varchar(255) not null,
+    role enum('admin', 'instructor', 'student') not null
+);
+
 create table professor (
     professor_id varchar(10) primary key,
     p_name varchar(25) not null,
@@ -47,7 +54,8 @@ create table professor (
     address_city varchar(25),
     address_state varchar(15),
     address_zip numeric(5,0),
-    foreign key (dept_id) references department(department_id)
+    foreign key (dept_id) references department(department_id),
+    foreign key (professor_id) references users(user_id)
 );
 
 create table student (
@@ -62,7 +70,8 @@ create table student (
     address_city varchar(25),
     address_state varchar(15),
     address_zip numeric(5,0),
-    foreign key (dept_id) references department(department_id)
+    foreign key (dept_id) references department(department_id),
+    foreign key (student_id) references users(user_id)
 );
 
 create table section (
@@ -102,11 +111,3 @@ create table teaches (
     foreign key (course_id) references course(course_id)
 );
 
-create table users (
-    user_id varchar(10) primary key,
-    username varchar(25) unique not null,
-    password varchar(255) not null,
-    role enum('admin', 'instructor', 'student') not null,
-    foreign key (user_id) references student(student_id) on delete cascade,
-    foreign key (user_id) references professor(professor_id) on delete cascade
-);
