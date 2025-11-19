@@ -36,20 +36,20 @@ insert into course values('ENG150', 'English Literature', '3', '1003');
 insert into course values('HIST210', 'World History', '3', '1004');
 insert into course values('BIO110', 'General Biology', '4', '1005');
 
-INSERT INTO users VALUES ('123456789', 'Zachary', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'admin');
-INSERT INTO users VALUES ('987654321', 'Emmanuel', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'admin');
+INSERT INTO users VALUES ('123456789', 'Zachary', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'admin');
+INSERT INTO users VALUES ('987654321', 'Emmanuel', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'admin');
 
-INSERT INTO users VALUES ('1273892037', 'James Evans', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
-INSERT INTO users VALUES ('2384920183', 'Sarah Thompson', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
-INSERT INTO users VALUES ('3471829401', 'Robert Jenkins', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
-INSERT INTO users VALUES ('4592038174', 'Emily Rivera', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
-INSERT INTO users VALUES ('5610283947', 'Michael Chen', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'instructor');
+INSERT INTO users VALUES ('1273892037', 'James Evans', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'instructor');
+INSERT INTO users VALUES ('2384920183', 'Sarah Thompson', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'instructor');
+INSERT INTO users VALUES ('3471829401', 'Robert Jenkins', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'instructor');
+INSERT INTO users VALUES ('4592038174', 'Emily Rivera', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'instructor');
+INSERT INTO users VALUES ('5610283947', 'Michael Chen', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'instructor');
 
-INSERT INTO users VALUES ('9515617924', 'Emmanuel Uka', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
-INSERT INTO users VALUES ('9515617925', 'Luna Garcia', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
-INSERT INTO users VALUES ('9515617926', 'Marcus Lee', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
-INSERT INTO users VALUES ('9515617927', 'Sophia Brown', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
-INSERT INTO users VALUES ('9515617928', 'Noah Patel', '$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W', 'student');
+INSERT INTO users VALUES ('9515617924', 'Emmanuel Uka', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'student');
+INSERT INTO users VALUES ('9515617925', 'Luna Garcia', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'student');
+INSERT INTO users VALUES ('9515617926', 'Marcus Lee', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'student');
+INSERT INTO users VALUES ('9515617927', 'Sophia Brown', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'student');
+INSERT INTO users VALUES ('9515617928', 'Noah Patel', '$2b$12$wPxSX1rHXnrfhOgFOEMIJeoBZvE78m40T6NjfP9GZAz5Nk27wdJY', 'student');
 
 
 insert into professor values('1273892037', 'James Evans', '1001', 100000, 'j.evans@kent.edu', '120', 'county road 12', 'toledo', 'ohio', 23495 );

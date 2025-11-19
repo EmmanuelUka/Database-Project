@@ -11,7 +11,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',         
     'password': '',        
-    'database': 'project'
+    'database': 'euka'
 }
 
 @app.route('/', methods=['GET', 'POST'])
