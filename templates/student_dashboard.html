@@ -1,15 +1,11 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Dashboard</title>
-</head>
-<body>
-    <h1>Welcome, {{ username }} (Student)</h1>
+<h1>Welcome, {{ username }} </h1>
 
-    <h2> <a href="/student/profile">View / Edit My Info</a> </h2>
-    
+
+    <h1>Enroll in a section <a href="/student/register">Register here</a></h1>
+
+
+<div>
     <form action="{{ url_for('logout') }}">
         <button type="submit">Logout</button>
     </form>
-</body>
-</html>
+</div>

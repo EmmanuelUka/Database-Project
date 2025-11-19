@@ -79,27 +79,121 @@ def instructor_dashboard():
 def student_dashboard():
     if not session.get('user_id') or session.get('role') != 'student':
         flash('Unauthorized access. Please log in as student.')
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))       
     return render_template('student_dashboard.html', username=session['username'])
 
 
-@app.route('/student/profile')
-def student_profile():
+@app.route("/student/register")
+def show_sections():
     if not session.get('user_id') or session.get('role') != 'student':
-        flash('Unauthorized access. Please log in as student.')
+        flash("Unauthorized access.")
         return redirect(url_for('login'))
-    
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch sections student hasn't registered for yet
+        cursor.execute("""
+            SELECT s.section_number, s.course_id, s.semester, s.year, s.days, s.time, c.c_name
+            FROM section s
+            JOIN course c ON s.course_id = c.course_id
+            WHERE s.section_number NOT IN (
+                SELECT section_number FROM takes WHERE student_id = %s
+            )
+        """, (session['user_id'],))
+        sections = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template("register.html", sections=sections)
+
+
+
+@app.route("/student/register/submit", methods=["POST"])
+def register_submit():
+    if not session.get('user_id') or session.get('role') != 'student':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
     student_id = session['user_id']
-    
-    connection = mysql.connector.connect(**db_config)
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM student WHERE user_id = %s", (student_id,))
-    student = cursor.fetchone()
-    cursor.close()
-    connection.close()
+    section_number = request.form['section_id']
 
-    return render_template("student_profile.html", student=student)
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
 
+        # Check if already registered
+        cursor.execute("""
+            SELECT * FROM takes
+            WHERE student_id = %s AND section_number = %s
+        """, (student_id, section_number))
+        if cursor.fetchone():
+            flash("Already registered in this class.")
+            return redirect(url_for('show_sections'))
+
+        # Insert into takes with grade = NULL
+        cursor.execute("""
+            INSERT INTO takes (student_id, section_number, letter, course_ID)
+            SELECT %s, section_number, NULL, course_id
+            FROM section
+            WHERE section_number = %s
+        """, (student_id, section_number))
+        connection.commit()
+        flash("Successfully registered!")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('student_dashboard'))
+
+
+@app.route("/student/register/class_list", methods=["GET"])
+def class_list():
+    if not session.get('user_id') or session.get('role') != 'student':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    student_id = session['user_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Get all registered classes for this student
+        cursor.execute("""
+            SELECT t.section_number, t.course_id, s.semester, s.year, s.days, s.time
+            FROM takes t
+            JOIN section s ON t.section_number = s.section_number
+            WHERE t.student_id = %s
+        """, (student_id,))
+
+        registered_sections = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('class_list.html', registered_sections=registered_sections)
+
+@app.route("/student/register/drop_class", methods=["POST"])
+def drop_class():
+    if not session.get('user_id') or session.get('role') != 'student':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    student_id = session['user_id']
+    section_number = request.form['section_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Check if already registered
+        cursor.execute("""DELETE FROM takes 
+                       WHERE section_number = %s AND student_id = %s""",
+                       (section_number, student_id))
 
 
 
