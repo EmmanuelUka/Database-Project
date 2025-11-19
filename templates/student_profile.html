@@ -1,0 +1,23 @@
+<h2>My Information</h2>
+
+<form method="POST" action="/student/profile/update">
+    <label>Student ID</label>
+    <input type="text" value="{{ student.student_id }}" disabled><br><br>
+
+    <label>First Name</label>
+    <input type="text" name="first_name" value="{{ student.first_name }}"><br><br>
+
+    <label>Last Name</label>
+    <input type="text" name="last_name" value="{{ student.last_name }}"><br><br>
+
+    <label>Email</label>
+    <input type="email" name="email" value="{{ student.email }}"><br><br>
+
+    <label>Phone</label>
+    <input type="text" name="phone" value="{{ student.phone }}"><br><br>
+
+    <label>Major</label>
+    <input type="text" name="major" value="{{ student.major }}"><br><br>
+
+    <button type="submit">Save Changes</button>
+</form>

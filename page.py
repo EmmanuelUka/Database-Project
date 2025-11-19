@@ -14,42 +14,49 @@ db_config = {
     'database': 'euka'
 }
 
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
 
+        connection = None
+        cursor = None
+        user = None
+        
         try:
             connection = mysql.connector.connect(**db_config)
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
             user = cursor.fetchone()
-        finally:
-            cursor.close()
-            connection.close()
 
+        except mysql.connector.Error as err:
+            print("Database Error:", err)
+            flash("Database connection failed.")
+            return redirect(url_for('login'))
+
+        finally:
+            if cursor:
+                cursor.close()
+            if connection:
+                connection.close()
+
+        # Authentication logic
         if user and bcrypt.check_password_hash(user['password'], password):
             session['user_id'] = user['user_id']
             session['username'] = user['username']
             session['role'] = user['role']
             flash('Login successful!')
 
-            # Redirect based on role
-            if user['role'] == 'admin':
-                return redirect(url_for('admin_dashboard'))
-            elif user['role'] == 'instructor':
-                return redirect(url_for('instructor_dashboard'))
-            elif user['role'] == 'student':
-                return redirect(url_for('student_dashboard'))
-            else:
-                flash('Unknown role.')
-                return redirect(url_for('login'))
+            # Routing based on role
+            return redirect(url_for(f"{user['role']}_dashboard"))
+            
         else:
             flash('Invalid username or password')
 
-    # If GET request or no valid login, just show the page again
     return render_template('login.html')
+
 
 
 @app.route('/admin')
@@ -74,6 +81,26 @@ def student_dashboard():
         flash('Unauthorized access. Please log in as student.')
         return redirect(url_for('login'))
     return render_template('student_dashboard.html', username=session['username'])
+
+
+@app.route('/student/profile')
+def student_profile():
+    if not session.get('user_id') or session.get('role') != 'student':
+        flash('Unauthorized access. Please log in as student.')
+        return redirect(url_for('login'))
+    
+    student_id = session['user_id']
+    
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM student WHERE user_id = %s", (student_id,))
+    student = cursor.fetchone()
+    cursor.close()
+    connection.close()
+
+    return render_template("student_profile.html", student=student)
+
+
 
 
 @app.route('/logout')
