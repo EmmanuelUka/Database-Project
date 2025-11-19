@@ -109,5 +109,149 @@ def logout():
     flash("You have been logged out.")
     return redirect(url_for('login'))
 
+
+@app.route('/admin/departments')
+def manage_departments():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT department_ID, d_name, b_name, budget FROM department")
+        departments = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('manage_departments.html', departments=departments)
+
+@app.route('/admin/departments/add', methods=['GET', 'POST'])
+def add_department():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        department_ID = request.form['department_ID']
+        d_name = request.form['d_name']
+        b_name = request.form['b_name']
+        budget = request.form['budget']
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor()
+            cursor.execute(
+                "INSERT INTO department (department_ID, d_name, b_name, budget) VALUES (%s, %s, %s, %s)",
+                (department_ID, d_name, b_name, budget)
+            )
+            connection.commit()
+        finally:
+            cursor.close()
+            connection.close()
+
+        flash("Department added successfully!")
+        return redirect(url_for('manage_departments'))
+
+    return render_template('add_department.html')
+
+@app.route('/admin/departments/delete/<int:department_id>')
+def delete_department(department_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM department WHERE department_ID = %s", (department_id,))
+        connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+    flash("Department deleted successfully!")
+    return redirect(url_for('manage_departments'))
+
+
+@app.route('/admin/departments/search', methods=['GET', 'POST'])
+def search_department_name():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_department.html')
+
+    term = request.form.get('term', '').strip()
+    if not term:
+        flash("Please enter a search term.")
+        return redirect(url_for('search_department_name'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        pattern = f"%{term}%"
+
+        cursor.execute("""
+            SELECT department_ID, d_name, b_name, budget
+            FROM department
+            WHERE d_name LIKE %s
+            ORDER BY d_name
+        """, (pattern,))
+
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'manage_departments.html',
+        departments=results,
+        search_term=term
+    )
+
+
+@app.route('/admin/departments/update/<int:department_id>', methods=['GET', 'POST'])
+def update_department(department_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Get current values
+        cursor.execute("SELECT * FROM department WHERE department_ID = %s", (department_id,))
+        department = cursor.fetchone()
+
+        if not department:
+            flash("Department not found.")
+            return redirect(url_for('manage_departments'))
+
+        if request.method == 'POST':
+            # Only update fields that are not blank
+            new_d_name = request.form.get('d_name') or department['d_name']
+            new_b_name = request.form.get('b_name') or department['b_name']
+            new_budget = request.form.get('budget') or department['budget']
+
+            cursor.execute("""
+                UPDATE department
+                SET d_name = %s, b_name = %s, budget = %s
+                WHERE department_ID = %s
+            """, (new_d_name, new_b_name, new_budget, department_id))
+            connection.commit()
+            flash("Department updated successfully!")
+            return redirect(url_for('manage_departments'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('update_department.html', department=department)
+
 if __name__ == '__main__':
     app.run(debug=True)

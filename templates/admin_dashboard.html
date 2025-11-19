@@ -5,8 +5,12 @@
 </head>
 <body>
     <h1>Welcome, {{ username }} (Admin)</h1>
-    <form action="{{ url_for('logout') }}">
-        <button type="submit">Logout</button>
-    </form>
+    <a href="/logout"><button>logout</button></a>
+    <a href="/admin"><button>manage courses</button></a>
+    <a href="/admin"><button>manage sections</button></a>
+    <a href="/admin"><button>manage classrooms</button></a>
+    <a href="/admin/departments"><button>manage department</button></a>
+    <a href="/admin"><button>manage students</button></a>
+    <a href="/admin"><button>manage proffessors</button></a>
 </body>
 </html>
