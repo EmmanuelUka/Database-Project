@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Department</title>
+</head>
+<body>
+<h1>Update Department {{ department.department_ID }}</h1>
+
+<form method="POST">
+    <label>Department Name:</label><br>
+    <input type="text" name="d_name" placeholder="{{ department.d_name }}"><br><br>
+
+    <label>Building Name:</label><br>
+    <input type="text" name="b_name" placeholder="{{ department.b_name }}"><br><br>
+
+    <label>Budget:</label><br>
+    <input type="number" name="budget" placeholder="{{ department.budget }}"><br><br>
+
+    <button type="submit">Update Department</button>
+</form>
+
+<br>
+<a href="/admin/departments"><button>Back to Departments</button></a>
+
+</body>
+</html>
