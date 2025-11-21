@@ -227,5 +227,902 @@ def update_department(department_id):
 
     return render_template('update_department.html', department=department)
 
+
+@app.route('/admin/classrooms')
+def manage_classrooms():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT b_name, room_number, capacity FROM classroom")
+        classrooms = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('manage_classrooms.html', classrooms=classrooms)
+
+
+@app.route('/admin/classrooms/add', methods=['GET', 'POST'])
+def add_classroom():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        b_name = request.form['b_name']
+        room_number = request.form['room_number']
+        capacity = request.form['capacity']
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor()
+            cursor.execute(
+                "INSERT INTO classroom (b_name, room_number, capacity) VALUES (%s, %s, %s)",
+                (b_name, room_number, capacity)
+            )
+            connection.commit()
+        finally:
+            cursor.close()
+            connection.close()
+
+        flash("Classroom added successfully!")
+        return redirect(url_for('manage_classrooms'))
+
+    return render_template('add_classroom.html')
+
+
+@app.route('/admin/classrooms/delete/<b_name>/<room_number>')
+def delete_classroom(b_name, room_number):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute(
+            "DELETE FROM classroom WHERE b_name = %s AND room_number = %s",
+            (b_name, room_number)
+        )
+        connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+    flash("Classroom deleted successfully!")
+    return redirect(url_for('manage_classrooms'))
+
+
+@app.route('/admin/classrooms/update/<b_name>/<room_number>', methods=['GET', 'POST'])
+def update_classroom(b_name, room_number):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch existing classroom info
+        cursor.execute(
+            "SELECT * FROM classroom WHERE b_name = %s AND room_number = %s",
+            (b_name, room_number)
+        )
+        classroom = cursor.fetchone()
+
+        if not classroom:
+            flash("Classroom not found.")
+            return redirect(url_for('manage_classrooms'))
+
+        if request.method == 'POST':
+            new_capacity = request.form.get('capacity', '').strip()
+
+            if new_capacity != "":
+                cursor.execute(
+                    "UPDATE classroom SET capacity = %s WHERE b_name = %s AND room_number = %s",
+                    (new_capacity, b_name, room_number)
+                )
+                connection.commit()
+                flash("Classroom updated successfully!")
+                return redirect(url_for('manage_classrooms'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('update_classroom.html', classroom=classroom)
+
+
+@app.route('/admin/classrooms/search', methods=['GET', 'POST'])
+def search_classrooms():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_classroom.html')
+
+    term = request.form.get('term', '').strip()
+
+    if not term:
+        flash("Please enter a search term.")
+        return redirect(url_for('search_classrooms'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)   # ← FIXED!
+
+        pattern = f"%{term}%"
+        cursor.execute("""
+            SELECT b_name, room_number, capacity
+            FROM classroom
+            WHERE b_name LIKE %s
+            ORDER BY b_name, room_number
+        """, (pattern,))
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'manage_classrooms.html',
+        classrooms=results,
+        search_term=term
+    )
+
+
+@app.route('/admin/students')
+def manage_students():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM student")
+        students = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT student_id, s_name, dept_id, tot_credits, gpa
+            FROM student
+            ORDER BY student_id
+        """)
+        students = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('manage_students.html', students=students)
+
+
+@app.route('/admin/students/search', methods=['GET', 'POST'])
+def search_students():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_student.html')
+
+    term = request.form.get('term', '').strip()
+    if not term:
+        flash("Please enter a search term.")
+        return redirect(url_for('search_students'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM student")
+        students = cursor.fetchall()
+
+        pattern = f"%{term}%"
+        cursor.execute("""
+            SELECT student_id, s_name, dept_id, tot_credits, gpa
+            FROM student
+            WHERE s_name LIKE %s OR student_id LIKE %s
+            ORDER BY s_name
+        """, (pattern, pattern))
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'manage_students.html',
+        students=results,
+        search_term=term
+    )
+
+
+@app.route('/admin/students/add', methods=['GET', 'POST'])
+def add_student():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        data = (
+            request.form['student_id'],    
+            request.form['s_name'],
+            request.form['dept_id'],
+            request.form['tot_credits'],
+            request.form['gpa'],
+            request.form['email'],
+            request.form['address_houseNumber'],
+            request.form['address_street'],
+            request.form['address_city'],
+            request.form['address_state'],
+            request.form['address_zip']
+        )
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor()
+            cursor.execute("""
+                INSERT INTO student (
+                    student_id, s_name, dept_id, tot_credits, gpa, email,
+                    address_houseNumber, address_street, address_city,
+                    address_state, address_zip
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, data)
+            connection.commit()
+            flash("Student added successfully!")
+            return redirect(url_for('manage_students'))
+        finally:
+            cursor.close()
+            connection.close()
+
+    return render_template('add_student.html')
+
+
+@app.route('/admin/students/update/<student_id>', methods=['GET', 'POST'])
+def update_student(student_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch student
+        cursor.execute("SELECT * FROM student WHERE student_id = %s", (student_id,))
+        student = cursor.fetchone()
+        if not student:
+            flash("Student not found.")
+            return redirect(url_for('manage_students'))
+
+        if request.method == 'POST':
+            data = (
+                request.form['s_name'],
+                request.form['dept_id'],
+                request.form['tot_credits'],
+                request.form['gpa'],
+                request.form['email'],
+                request.form['address_houseNumber'],
+                request.form['address_street'],
+                request.form['address_city'],
+                request.form['address_state'],
+                request.form['address_zip'],
+                student_id
+            )
+
+            cursor.execute("""
+                UPDATE student
+                SET s_name=%s, dept_id=%s, tot_credits=%s, gpa=%s,
+                    email=%s, address_houseNumber=%s, address_street=%s,
+                    address_city=%s, address_state=%s, address_zip=%s
+                WHERE student_id=%s
+            """, data)
+            connection.commit()
+            flash("Student updated successfully!")
+            return redirect(url_for('manage_students'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('update_student.html', student=student)
+
+
+@app.route('/admin/students/delete/<student_id>')
+def delete_student(student_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute("DELETE FROM student WHERE student_id = %s", (student_id,))
+        connection.commit()
+
+        flash("Student deleted successfully!")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('manage_students'))
+
+@app.route('/admin/professors')
+def manage_professors():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    search = request.args.get('search')
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    if search:
+        query = "SELECT * FROM professor WHERE p_name LIKE %s"
+        cursor.execute(query, (f"%{search}%",))
+    else:
+        cursor.execute("SELECT * FROM professor")
+
+    professors = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template('manage_professors.html',
+        professors=professors,
+        search_term=search)
+
+
+@app.route('/admin/professors/add', methods=['GET', 'POST'])
+def add_professor():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        professor_id = request.form['professor_id']
+        p_name = request.form['p_name']
+        dept_id = request.form['dept_id']
+        salary = request.form['salary']
+        email = request.form['email']
+        hn = request.form['address_houseNumber']
+        street = request.form['address_street']
+        city = request.form['address_city']
+        state = request.form['address_state']
+        zipc = request.form['address_zip']
+
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        query = """
+            INSERT INTO professor 
+            (professor_id, p_name, dept_id, salary, email,
+             address_houseNumber, address_street, address_city, address_state, address_zip)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """
+
+        cursor.execute(query, (professor_id, p_name, dept_id, salary, email,
+                               hn, street, city, state, zipc))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        flash("Professor added successfully!")
+        return redirect(url_for('manage_professors'))
+
+    return render_template('add_professor.html')
+
+
+@app.route('/admin/professors/update/<professor_id>', methods=['GET', 'POST'])
+def update_professor(professor_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM professor WHERE professor_id = %s", (professor_id,))
+    professor = cursor.fetchone()
+
+    if request.method == 'POST':
+        p_name = request.form['p_name']
+        dept_id = request.form['dept_id']
+        salary = request.form['salary']
+        email = request.form['email']
+        hn = request.form['address_houseNumber']
+        street = request.form['address_street']
+        city = request.form['address_city']
+        state = request.form['address_state']
+        zipc = request.form['address_zip']
+
+        update_query = """
+            UPDATE professor SET
+                p_name=%s, dept_id=%s, salary=%s, email=%s,
+                address_houseNumber=%s, address_street=%s, address_city=%s,
+                address_state=%s, address_zip=%s
+            WHERE professor_id=%s
+        """
+
+        cursor.execute(update_query, (p_name, dept_id, salary, email,
+                                      hn, street, city, state, zipc, professor_id))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+        flash("Professor updated successfully!")
+        return redirect(url_for('manage_professors'))
+
+    cursor.close()
+    connection.close()
+
+    return render_template('update_professor.html', professor=professor)
+
+
+@app.route('/admin/professors/delete/<professor_id>')
+def delete_professor(professor_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute("DELETE FROM professor WHERE professor_id = %s", (professor_id,))
+        connection.commit()
+
+        flash("Professor deleted successfully!")
+
+    except mysql.connector.IntegrityError:
+        flash("Cannot delete professor: They are referenced elsewhere.")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('manage_professors'))
+
+
+@app.route('/admin/professors/search', methods=['GET', 'POST'])
+def search_professors():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_professor.html')
+
+    term = request.form.get('term', '').strip()
+    if not term:
+        flash("Please enter a search term.")
+        return redirect(url_for('search_professors'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        pattern = f"%{term}%"
+        cursor.execute("""
+            SELECT professor_id, p_name, dept_id, salary
+            FROM professor
+            WHERE p_name LIKE %s
+            ORDER BY p_name
+        """, (pattern,))
+        results = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'manage_professors.html',
+        professors=results,
+        search_term=term
+    )
+
+
+@app.route('/admin/courses')
+def manage_courses():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM course ORDER BY course_id")
+    courses = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template('manage_courses.html', courses=courses)
+
+
+@app.route('/admin/courses/search', methods=['GET', 'POST'])
+def search_courses():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_course.html')
+
+    dept = request.form.get('term', '').strip()
+
+    if dept == "":
+        flash("Please enter a department ID.")
+        return redirect(url_for('search_courses'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT * FROM course
+        WHERE department_id LIKE %s
+        ORDER BY course_id
+    """, (f"%{dept}%",))
+
+    results = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        'manage_courses.html',
+        courses=results,
+        search_term=dept
+    )
+
+
+@app.route('/admin/courses/add', methods=['GET', 'POST'])
+def add_course():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        course_id = request.form['course_id']
+        c_name = request.form['c_name']
+        credits = request.form['credits']
+        department_id = request.form['department_id']
+
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        # Validate department_id
+        cursor.execute(
+            "SELECT department_id FROM department WHERE department_id = %s",
+            (department_id,)
+        )
+        exists = cursor.fetchone()
+        if not exists:
+            flash("Invalid Department ID.")
+            cursor.close()
+            connection.close()
+            return redirect(url_for('add_course'))
+
+        cursor.execute("""
+            INSERT INTO course (course_id, c_name, credits, department_id)
+            VALUES (%s,%s,%s,%s)
+        """, (course_id, c_name, credits, department_id))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        flash("Course added successfully!")
+        return redirect(url_for('manage_courses'))
+
+    return render_template('add_course.html')
+
+
+@app.route('/admin/courses/update/<course_id>', methods=['GET', 'POST'])
+def update_course(course_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM course WHERE course_id = %s", (course_id,))
+    course = cursor.fetchone()
+
+    if not course:
+        cursor.close()
+        connection.close()
+        flash("Course not found.")
+        return redirect(url_for('manage_courses'))
+
+    if request.method == 'POST':
+        c_name = request.form['c_name']
+        credits = request.form['credits']
+        department_id = request.form['department_id']
+
+        # validate department_id
+        cursor.execute(
+            "SELECT department_id FROM department WHERE department_id = %s",
+            (department_id,)
+        )
+        exists = cursor.fetchone()
+
+        if not exists:
+            cursor.close()
+            connection.close()
+            flash("Invalid Department ID.")
+            return redirect(url_for('update_course', course_id=course_id))
+
+        cursor.execute("""
+            UPDATE course
+            SET c_name=%s, credits=%s, department_id=%s
+            WHERE course_id=%s
+        """, (c_name, credits, department_id, course_id))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        flash("Course updated successfully!")
+        return redirect(url_for('manage_courses'))
+
+    cursor.close()
+    connection.close()
+
+    return render_template('update_course.html', course=course)
+
+
+@app.route('/admin/courses/delete/<course_id>')
+def delete_course(course_id):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute("DELETE FROM course WHERE course_id = %s", (course_id,))
+        connection.commit()
+
+        flash("Course deleted successfully!")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('manage_courses'))
+
+
+@app.route('/admin/sections')
+def manage_sections():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM section ORDER BY section_number")
+        sections = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('manage_sections.html', sections=sections)
+
+
+@app.route('/admin/sections/search', methods=['GET', 'POST'])
+def search_sections():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('search_section.html')
+
+    course = request.form.get('course_id', '').strip()
+    semester = request.form.get('semester', '').strip()
+
+    if not course and not semester:
+        flash("Please enter a course ID or select a semester.")
+        return redirect(url_for('search_sections'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        if course and semester:
+            cursor.execute("""
+                SELECT * FROM section
+                WHERE course_id LIKE %s AND semester = %s
+                ORDER BY section_number
+            """, (f"%{course}%", semester))
+        elif course:
+            cursor.execute("""
+                SELECT * FROM section
+                WHERE course_id LIKE %s
+                ORDER BY section_number
+            """, (f"%{course}%",))
+        else:
+            cursor.execute("""
+                SELECT * FROM section
+                WHERE semester = %s
+                ORDER BY section_number
+            """, (semester,))
+
+        results = cursor.fetchall()
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('manage_sections.html', sections=results, search_term=f"{course} {semester}".strip())
+
+
+@app.route('/admin/sections/add', methods=['GET', 'POST'])
+def add_section():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        section_number = request.form['section_number'].strip()
+        course_id = request.form['course_id'].strip()
+        professor_id = request.form['professor_id'].strip()
+        semester = request.form['semester'].strip()
+        b_name = request.form['b_name'].strip()
+        room_number = request.form['room_number'].strip()
+        capacity = request.form.get('capacity') or None
+
+        valid_semesters = ['Fall', 'Spring', 'Summer', 'Winter']
+        if semester not in valid_semesters:
+            flash("Invalid semester. Choose Fall, Spring, Summer, or Winter.")
+            return redirect(url_for('add_section'))
+
+        try:
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor()
+
+            cursor.execute("SELECT course_id FROM course WHERE course_id = %s", (course_id,))
+            if not cursor.fetchone():
+                flash("Invalid course_id.")
+                return redirect(url_for('add_section'))
+
+            cursor.execute("SELECT professor_id FROM professor WHERE professor_id = %s", (professor_id,))
+            if not cursor.fetchone():
+                flash("Invalid professor_id.")
+                return redirect(url_for('add_section'))
+
+            cursor.execute("SELECT b_name FROM classroom WHERE b_name = %s AND room_number = %s", (b_name, room_number))
+            if not cursor.fetchone():
+                flash("Invalid classroom (building name + room number).")
+                return redirect(url_for('add_section'))
+
+            cursor.execute("""
+                INSERT INTO section
+                (section_number, course_id, professor_id, semester, b_name, room_number, capacity)
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """, (section_number, course_id, professor_id, semester, b_name, room_number, capacity))
+            connection.commit()
+            flash("Section added successfully!")
+            return redirect(url_for('manage_sections'))
+
+        except mysql.connector.Error as err:
+            flash(str(err))
+            return redirect(url_for('add_section'))
+
+        finally:
+            cursor.close()
+            connection.close()
+
+    return render_template('add_section.html')
+
+
+@app.route('/admin/sections/update/<course_id>/<section_number>', methods=['GET', 'POST'])
+def update_section(course_id, section_number):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT *
+            FROM section
+            WHERE course_id = %s AND section_number = %s
+        """, (course_id, section_number))
+        section = cursor.fetchone()
+
+        if not section:
+            flash("Section not found.")
+            return redirect(url_for('manage_sections'))
+
+        if request.method == 'POST':
+            new_course_id = request.form['course_id'].strip()
+            professor_id = request.form['professor_id'].strip()
+            semester = request.form['semester'].strip()
+            b_name = request.form['b_name'].strip()
+            room_number = request.form['room_number'].strip()
+            capacity = request.form.get('capacity') or None
+
+            valid_semesters = ['Fall', 'Spring', 'Summer', 'Winter']
+            if semester not in valid_semesters:
+                flash("Invalid semester.")
+                return redirect(url_for('update_section', course_id=course_id, section_number=section_number))
+
+            cursor.execute("SELECT course_id FROM course WHERE course_id = %s", (new_course_id,))
+            if not cursor.fetchone():
+                flash("Invalid course_id.")
+                return redirect(url_for('update_section', course_id=course_id, section_number=section_number))
+
+            cursor.execute("SELECT professor_id FROM professor WHERE professor_id = %s", (professor_id,))
+            if not cursor.fetchone():
+                flash("Invalid professor_id.")
+                return redirect(url_for('update_section', course_id=course_id, section_number=section_number))
+
+            cursor.execute("""
+                SELECT *
+                FROM classroom
+                WHERE b_name = %s AND room_number = %s
+            """, (b_name, room_number))
+            if not cursor.fetchone():
+                flash("Invalid classroom.")
+                return redirect(url_for('update_section', course_id=course_id, section_number=section_number))
+
+            cursor.execute("""
+                UPDATE section
+                SET course_id=%s, professor_id=%s, semester=%s, b_name=%s, room_number=%s, capacity=%s
+                WHERE course_id=%s AND section_number=%s
+            """, (new_course_id, professor_id, semester, b_name, room_number, capacity, course_id, section_number))
+            connection.commit()
+
+            flash("Section updated successfully!")
+            return redirect(url_for('manage_sections'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('update_section.html', section=section)
+
+
+@app.route('/admin/sections/delete/<course_id>/<section_number>')
+def delete_section(course_id, section_number):
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+        cursor.execute("""
+            DELETE FROM section
+            WHERE course_id = %s AND section_number = %s
+        """, (course_id, section_number))
+        connection.commit()
+        flash("Section deleted successfully!")
+    except mysql.connector.IntegrityError:
+        flash("Cannot delete section: referenced elsewhere.")
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('manage_sections'))
+
+    
 if __name__ == '__main__':
     app.run(debug=True)

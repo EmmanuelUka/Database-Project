@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Sections</title>
+    <style>
+        body { font-family: Arial; background:#f5f6fa; padding:30px; }
+        table { width:100%; border-collapse:collapse; background:white; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+        th,td { border:1px solid #ccc; padding:12px; text-align:left; }
+        th { background:#4CAF50; color:white; }
+        tr:hover { background:#f1f1f1; }
+        a.button { display:inline-block; padding:8px 12px; margin:5px; background:#4CAF50; color:white; text-decoration:none; border-radius:5px;}
+        a.button:hover { background:#45a049; }
+    </style>
+</head>
+<body>
+
+<h1>Sections</h1>
+
+<a href="/admin"><button>Dashboard</button></a>
+<a href="/admin/sections/add"><button>Add Section</button></a>
+<a href="/admin/sections/search"><button>Search Sections</button></a>
+
+{% if search_term %}
+    <a href="/admin/sections"><button>Show Full List</button></a>
+    <h2>Showing results for "{{ search_term }}"</h2>
+{% endif %}
+
+<br><br>
+
+<table>
+    <tr>
+        <th>Section Number</th>
+        <th>Course ID</th>
+        <th>Professor ID</th>
+        <th>Semester</th>
+        <th>Building</th>
+        <th>Room</th>
+        <th>Capacity</th>
+        <th>Update</th>
+        <th>Delete</th>
+    </tr>
+
+    {% for s in sections %}
+    <tr>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.professor_id }}</td>
+        <td>{{ s.semester }}</td>
+        <td>{{ s.b_name }}</td>
+        <td>{{ s.room_number }}</td>
+        <td>{{ s.capacity }}</td>
+
+        <td>
+            <a href="{{ url_for('update_section',
+                                course_id=s.course_id,
+                                section_number=s.section_number) }}">
+                <button>Update</button>
+            </a>
+        </td>
+
+        <td>
+            <a href="{{ url_for('delete_section',
+                                course_id=s.course_id,
+                                section_number=s.section_number) }}"
+               onclick="return confirm('Are you sure you want to delete this section?');">
+                <button>Delete</button>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

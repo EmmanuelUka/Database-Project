@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Professors</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f6fa; padding: 30px; }
+        table { border-collapse: collapse; width: 100%; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+    </style>
+</head>
+<body>
+
+<h1>Professors</h1>
+
+<a href="/admin"><button>Dashboard</button></a>
+<a href="/admin/professors/add"><button>Add Professor</button></a>
+<a href="/admin/professors/search"><button>Search Professor</button></a>
+
+{% if search_term %}
+    <a href="/admin/students"><button>Show Full List</button></a>
+    <h2>Showing results for "{{ search_term }}"</h2>
+{% endif %}
+
+<br><br>
+
+<table>
+    <tr>
+        <th>Professor ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Salary</th>
+        <th>Update</th>
+        <th>Delete</th>
+    </tr>
+
+    {% for p in professors %}
+    <tr>
+        <td>{{ p.professor_id }}</td>
+        <td>{{ p.p_name }}</td>
+        <td>{{ p.dept_id }}</td>
+        <td>{{ p.salary }}</td>
+
+        <td>
+            <a href="{{ url_for('update_professor', professor_id=p.professor_id) }}">
+                <button>Update</button>
+            </a>
+        </td>
+
+        <td>
+            <a href="{{ url_for('delete_professor', professor_id=p.professor_id) }}"
+               onclick="return confirm('Delete this professor?');">
+               <button>Delete</button>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
