@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Final Grades</title>
+</head>
+<body>
+    <h1> Final grades for {{session.username}} </h1>
+
+    <table border ="1">
+        <tr>
+            <th>Section</th>
+            <th>Course</th>
+            <th>Letter</th>
+            <th>Semester</th>
+            <th>Year</th>
+
+        </tr>
+
+        {% for s in grades%}
+        <tr>
+            <td>{{s.section_number}}</td>
+            <td>{{s.course_id}}</td>
+            <td>{{s.letter}}</td>
+            <td>{{s.semester}}</td>
+            <td>{{s.year}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+
+
+
+</body>

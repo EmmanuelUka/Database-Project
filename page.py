@@ -177,6 +177,7 @@ def class_list():
 
     return render_template('class_list.html', registered_sections=registered_sections)
 
+
 @app.route("/student/register/drop_class", methods=["POST"])
 def drop_class():
     if not session.get('user_id') or session.get('role') != 'student':
@@ -184,16 +185,56 @@ def drop_class():
         return redirect(url_for('login'))
 
     student_id = session['user_id']
-    section_number = request.form['section_id']
+    section_number = request.form['section_id']  
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            DELETE FROM takes 
+            WHERE section_number = %s AND student_id = %s
+        """, (section_number, student_id))
+
+        connection.commit()
+        flash("Class dropped successfully.")
+
+    except Exception as e:
+        flash(f"Error dropping class: {e}")
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return redirect(url_for('class_list'))   
+
+
+@app.route('/student/register/final_grade', methods=['GET'])
+def final_grade():
+    if not session.get('user_id') or session.get('role') != 'student':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    student_id = session['user_id']
 
     try:
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Check if already registered
-        cursor.execute("""DELETE FROM takes 
-                       WHERE section_number = %s AND student_id = %s""",
-                       (section_number, student_id))
+        cursor.execute("""
+            SELECT t.section_number, t.course_id, t.letter, s.semester, s.year
+            FROM takes t
+            JOIN section s ON t.section_number = s.section_number
+            WHERE t.student_id = %s
+        """, (student_id,))
+
+        grades = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('final_grades.html', grades=grades)
 
 
 

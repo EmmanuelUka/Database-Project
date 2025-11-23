@@ -1,8 +1,38 @@
-<h1>Your Registered Classes</h1>
-<ul>
-{% for s in registered_sections %}
-    <li>{{ s.course_id }} — {{ s.semester }} {{ s.year }} ({{ s.days }} @ {{ s.time }})</li>
-{% endfor %}
-</ul>
+<h1>Your Registered Classes
+    <br>
+    Register and drop classes
+</h1>
 
-<a href="/student/register">Register for more classes</a>
+<table border="1">
+    <tr>
+        <th>Section</th>
+        <th>Course</th>
+        <th>Semester</th>
+        <th>Year</th>
+        <th>Days</th>
+        <th>Time</th>
+        <th>Action</th>
+    </tr>
+
+    {% for s in registered_sections %}
+    <tr>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.semester }}</td>
+        <td>{{ s.year }}</td>
+        <td>{{ s.days }}</td>
+        <td>{{ s.time }}</td>
+
+        <td>
+            <form action="/student/register/drop_class" method="POST">
+                <input type="hidden" name="section_id" value="{{ s.section_number }}">
+                <button type="submit">Drop</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<h1>To Register for more classes, click <a href="/student/register">here</a></h1>   
