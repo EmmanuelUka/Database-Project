@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assigned Sections</title>
+    <style>
+        body { font-family: Arial; background:#f5f6fa; padding:30px; }
+        table { border-collapse: collapse; width: 100%; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+    </style>
+</head>
+<body>
+
+<h1>Assigned Sections</h1>
+
+<a href="/admin"><button>Dashboard</button></a>
+<a href="{{ url_for('manage_assignments') }}"><button>View Free Sections</button></a>
+
+<br><br>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for m in messages %}
+      <div style="background:#ddffdd;padding:10px;border-left:5px solid #2ecc71;margin-bottom:10px;">
+        {{ m }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<table>
+    <tr>
+        <th>Section</th>
+        <th>Course</th>
+        <th>Course Name</th>
+        <th>Professor</th>
+        <th>Semester</th>
+        <th>Year</th>
+        <th>Building</th>
+        <th>Room</th>
+        <th>Change/Unassign</th>
+    </tr>
+    {% for s in sections %}
+    <tr>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.c_name or '' }}</td>
+        <td>{{ s.prof_name or s.professor_id }}</td>
+        <td>{{ s.semester }}</td>
+        <td>{{ s.year }}</td>
+        <td>{{ s.b_name }}</td>
+        <td>{{ s.room_number }}</td>
+        <td>
+            <a href="{{ url_for('assign_section', section_number=s.section_number) }}"><button>Change / Unassign</button></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

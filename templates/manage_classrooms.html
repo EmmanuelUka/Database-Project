@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manage Departments</title>
+    <title>Manage Classrooms</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,7 +28,7 @@
         }
         a.button {
             display: inline-block;
-            padding: 8px 15px;
+            padding: 8px 12px;
             margin: 5px;
             background-color: #4CAF50;
             color: white;
@@ -42,43 +42,41 @@
 </head>
 <body>
 
-<h1>Departments</h1>
+<h1>Classrooms</h1>
 
-<a href="/admin"><button>dashboard</button></a>
-<a href="/admin/departments/add"><button>add department</button></a>
-<a href="/admin/departments/search"><button>search by name</button></a>
+<a href="/admin"><button>Dashboard</button></a>
+<a href="/admin/classrooms/add"><button>Add Classroom</button></a>
+<a href="/admin/classrooms/search"><button>Search Classroom</button></a>
 
 {% if search_term %}
-  <a href="/admin/departments"><button>Show Full List</button></a>
-  <h2>Results for "{{ search_term }}"</h2>
+    <a href="/admin/classrooms"><button>Show Full List</button></a>
+    <h2>Showing results for "{{ search_term }}"</h2>
 {% endif %}
 
 <br><br>
 
 <table>
     <tr>
-        <th>Department ID</th>
-        <th>Department Name</th>
         <th>Building Name</th>
-        <th>Budget</th>
-        <th>Actions</th>
-        <th>       </th>
+        <th>Room Number</th>
+        <th>Capacity</th>
+        <th>Update</th>
+        <th>Delete</th>
     </tr>
-    {% for dept in departments %}
+    {% for room in classrooms %}
     <tr>
-        <td>{{ dept.department_ID }}</td>
-        <td>{{ dept.d_name }}</td>
-        <td>{{ dept.b_name }}</td>
-        <td>{{ dept.budget }}</td>
+        <td>{{ room.b_name }}</td>
+        <td>{{ room.room_number }}</td>
+        <td>{{ room.capacity }}</td>
         <td>
-            <a href="{{ url_for('update_department', department_id=dept.department_ID) }}">
-            <button>Update</button>
+            <a href="{{ url_for('update_classroom', b_name=room.b_name, room_number=room.room_number) }}">
+                <button>Update</button>
             </a>
         </td>
         <td>
-            <a href="{{ url_for('delete_department', department_id=dept.department_ID) }}"
-                onclick="return confirm('Are you sure you want to delete this department?');">
-                <button>Delete</button>
+            <a href="{{ url_for('delete_classroom', b_name=room.b_name, room_number=room.room_number) }}"
+               onclick="return confirm('Are you sure you want to delete this classroom?');">
+               <button>Delete</button>
             </a>
         </td>
     </tr>

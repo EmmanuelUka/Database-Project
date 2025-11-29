@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p style="color:red;">{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+<head>
+    <title>Update Profile</title>
+    <style>
+        body { font-family: Arial; background:#f5f6fa; padding:30px; }
+        form { background:white; padding:20px; width:400px; margin:auto;
+               border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.15); }
+        label { font-weight:bold; }
+        input { width:100%; padding:8px; margin:10px 0; border:1px solid #ccc; border-radius:5px; }
+        button { padding:10px 15px; border:none; background:#4CAF50; color:white; border-radius:5px; }
+    </style>
+</head>
+<body>
+
+<form method="POST">
+
+    <label>Old Password:</label>
+    <input type="password" name="old_password" required>
+
+    <label>New Username:</label>
+    <input type="text" name="username" value="{{ user.username }}" required>
+
+    <label>New Password:</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Update</button>
+</form>
+
+<br>
+<a href="/admin"><button>Back</button></a>
+
+</body>
+</html>

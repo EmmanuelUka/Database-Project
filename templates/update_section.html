@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Section</title>
+</head>
+<body>
+
+<h1>Update Section</h1>
+
+<form method="POST">
+    <label>Section Number (cannot change):</label><br>
+    <input type="text" value="{{ section.section_number }}" disabled><br><br>
+
+    <label>Course ID:</label><br>
+    <input type="text" name="course_id" value="{{ section.course_id }}" required><br><br>
+
+    <label>Professor ID:</label><br>
+    <input type="text" name="professor_id" value="{{ section.professor_id }}" required><br><br>
+
+    <label>Semester (Fall, Spring, Summer, Winter):</label><br>
+    <input type="text" name="semester" value="{{ section.semester }}" required><br><br>
+
+    <label>Building Name:</label><br>
+    <input type="text" name="b_name" value="{{ section.b_name }}" required><br><br>
+
+    <label>Room Number:</label><br>
+    <input type="text" name="room_number" value="{{ section.room_number }}" required><br><br>
+
+    <label>Capacity:</label><br>
+    <input type="number" name="capacity" value="{{ section.capacity }}"><br><br>
+
+    <button type="submit">Update Section</button>
+</form>
+
+<a href="/admin/sections"><button>Back</button></a>
+
+</body>
+</html>
