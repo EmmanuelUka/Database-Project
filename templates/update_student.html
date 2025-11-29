@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Student</title>
+</head>
+<body>
+
+<h1>Update Student</h1>
+
+<form method="POST">
+    <label>Student ID (cannot change):</label>
+    <input type="text" value="{{ student.student_id }}" disabled><br><br>
+
+    <label>Name:</label>
+    <input type="text" name="s_name" value="{{ student.s_name }}"><br><br>
+
+    <label>Department ID:</label>
+    <input type="text" name="dept_id" value="{{ student.dept_id }}"><br><br>
+
+    <label>Total Credits:</label>
+    <input type="number" name="tot_credits" value="{{ student.tot_credits }}"><br><br>
+
+    <label>GPA:</label>
+    <input type="number" step="0.01" name="gpa" value="{{ student.gpa }}"><br><br>
+
+    <label>Email:</label>
+    <input type="text" name="email" value="{{ student.email }}"><br><br>
+
+    <label>House Number:</label>
+    <input type="text" name="address_houseNumber" value="{{ student.address_houseNumber }}"><br><br>
+
+    <label>Street:</label>
+    <input type="text" name="address_street" value="{{ student.address_street }}"><br><br>
+
+    <label>City:</label>
+    <input type="text" name="address_city" value="{{ student.address_city }}"><br><br>
+
+    <label>State:</label>
+    <input type="text" name="address_state" value="{{ student.address_state }}"><br><br>
+
+    <label>ZIP:</label>
+    <input type="text" name="address_zip" value="{{ student.address_zip }}"><br><br>
+
+    <button type="submit">Update Student</button>
+</form>
+
+<a href="/admin/students"><button>Back</button></a>
+
+</body>
+</html>

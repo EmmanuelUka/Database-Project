@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head><title>Update Course</title></head>
+<body>
+
+<h1>Update Course</h1>
+
+<form method="POST">
+
+    <label>Course ID (cannot change):</label>
+    <input type="text" value="{{ course.course_id }}" disabled><br><br>
+
+    <label>Name:</label>
+    <input type="text" name="c_name" value="{{ course.c_name }}" required><br><br>
+
+    <label>Credits:</label>
+    <input type="number" name="credits" value="{{ course.credits }}" required><br><br>
+
+    <label>Department ID:</label>
+    <input type="text" name="department_id" value="{{ course.department_id }}" required><br><br>
+
+    <button type="submit">Update Course</button>
+</form>
+
+<a href="/admin/courses"><button>Back</button></a>
+
+</body>
+</html>

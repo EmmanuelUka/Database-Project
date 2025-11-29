@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Departments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            padding: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a.button {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a.button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Departments</h1>
+
+<a href="/admin"><button>dashboard</button></a>
+<a href="/admin/departments/add"><button>add department</button></a>
+<a href="/admin/departments/search"><button>search by name</button></a>
+
+{% if search_term %}
+  <a href="/admin/departments"><button>Show Full List</button></a>
+  <h2>Results for "{{ search_term }}"</h2>
+{% endif %}
+
+<br><br>
+
+<table>
+    <tr>
+        <th>Department ID</th>
+        <th>Department Name</th>
+        <th>Building Name</th>
+        <th>Budget</th>
+        <th>Actions</th>
+        <th>       </th>
+    </tr>
+    {% for dept in departments %}
+    <tr>
+        <td>{{ dept.department_ID }}</td>
+        <td>{{ dept.d_name }}</td>
+        <td>{{ dept.b_name }}</td>
+        <td>{{ dept.budget }}</td>
+        <td>
+            <a href="{{ url_for('update_department', department_id=dept.department_ID) }}">
+            <button>Update</button>
+            </a>
+        </td>
+        <td>
+            <a href="{{ url_for('delete_department', department_id=dept.department_ID) }}"
+                onclick="return confirm('Are you sure you want to delete this department?');">
+                <button>Delete</button>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

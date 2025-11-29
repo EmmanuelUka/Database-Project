@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assign Professor to Section</title>
+    <style>
+        body { font-family: Arial; background:#f5f6fa; padding:30px; }
+        .box { background:white; padding:20px; width:700px; margin:auto; border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.12); }
+        label { font-weight:bold; }
+        select,input { width:100%; padding:8px; margin:10px 0; border:1px solid #ccc; border-radius:5px; }
+        button { padding:10px 15px; border:none; background:#4CAF50; color:white; border-radius:5px; }
+    </style>
+</head>
+<body>
+
+<h1>Assign / Modify Professor</h1>
+
+<a href="{{ url_for('manage_assignments') }}"><button>Back</button></a>
+
+<br><br>
+
+<div class="box">
+    <p><strong>Section:</strong> {{ section.section_number }}</p>
+    <p><strong>Course:</strong> {{ section.course_id }} — {{ section.c_name or '' }}</p>
+    <p><strong>Semester:</strong> {{ section.semester }} {{ section.year }}</p>
+    <p><strong>Location:</strong> {{ section.b_name }}, room {{ section.room_number }}</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for m in messages %}
+          <div style="background:#ffdddd;padding:10px;border-left:5px solid red;margin-bottom:10px;">
+            {{ m }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label>Select professor (department: {{ section.department_id or "N/A" }} )</label>
+        <select name="professor_id">
+            <option value="">-- choose professor --</option>
+            {% for p in professors %}
+                <option value="{{ p.professor_id }}">{{ p.professor_id }} — {{ p.p_name }}</option>
+            {% endfor %}
+        </select>
+
+        <div style="margin-top:12px;">
+            <button type="submit" name="action" value="assign">Assign / Change Professor</button>
+            <button type="submit" name="action" value="remove" onclick="return confirm('Remove assigned professor?');">Remove Professor</button>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

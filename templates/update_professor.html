@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Professor</title>
+</head>
+<body>
+
+<h1>Update Professor</h1>
+
+<form method="POST">
+
+    <label>Professor ID (cannot change):</label>
+    <input type="text" value="{{ professor.professor_id }}" disabled><br><br>
+
+    <label>Name:</label>
+    <input type="text" name="p_name" value="{{ professor.p_name }}"><br><br>
+
+    <label>Department ID:</label>
+    <input type="text" name="dept_id" value="{{ professor.dept_id }}"><br><br>
+
+    <label>Salary:</label>
+    <input type="number" name="salary" value="{{ professor.salary }}"><br><br>
+
+    <label>Email:</label>
+    <input type="text" name="email" value="{{ professor.email }}"><br><br>
+
+    <label>House Number:</label>
+    <input type="text" name="address_houseNumber" value="{{ professor.address_houseNumber }}"><br><br>
+
+    <label>Street:</label>
+    <input type="text" name="address_street" value="{{ professor.address_street }}"><br><br>
+
+    <label>City:</label>
+    <input type="text" name="address_city" value="{{ professor.address_city }}"><br><br>
+
+    <label>State:</label>
+    <input type="text" name="address_state" value="{{ professor.address_state }}"><br><br>
+
+    <label>Zip:</label>
+    <input type="text" name="address_zip" value="{{ professor.address_zip }}"><br><br>
+
+    <button type="submit">Update Professor</button>
+
+</form>
+
+<a href="/admin/professors"><button>Back</button></a>
+
+</body>
+</html>
