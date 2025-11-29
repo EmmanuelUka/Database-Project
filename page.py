@@ -1123,6 +1123,220 @@ def delete_section(course_id, section_number):
 
     return redirect(url_for('manage_sections'))
 
-    
+
+@app.route('/admin/profile/update', methods=['GET', 'POST'])
+def admin_profile_update():
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT user_id, username, password FROM users WHERE user_id = %s", (session['user_id'],))
+        user = cursor.fetchone()
+
+        if request.method == 'POST':
+            print("POST RECEIVED")
+            old_password = request.form['old_password']
+            new_username = request.form['username'].strip()
+            new_password = request.form['password'].strip()
+
+            if not new_username:
+                flash("Username cannot be empty.")
+                return redirect(url_for('admin_profile_update'))
+
+            if not bcrypt.check_password_hash(user['password'], old_password):
+                flash("Old password is incorrect.")
+                return redirect(url_for('admin_profile_update'))
+
+            if not new_password:
+                flash("New password cannot be empty.")
+                return redirect(url_for('admin_profile_update'))
+
+            hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+
+            cursor.execute("""
+                UPDATE users
+                SET username=%s, password=%s
+                WHERE user_id=%s
+            """, (new_username, hashed_password, session['user_id']))
+
+            connection.commit()
+
+            flash("Profile updated successfully!")
+            return redirect(url_for('admin_dashboard'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('admin_modify_info.html', user=user)
+
+
+@app.route('/admin/assignments')
+def manage_assignments():
+
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    dept = request.args.get('dept', '').strip()
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True, buffered=True)
+
+        if dept:
+            cursor.execute("""
+                SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
+                       s.room_number, s.capacity, c.department_id, c.c_name
+                FROM section s
+                JOIN course c ON s.course_id = c.course_id
+                WHERE s.professor_id IS NULL AND c.department_id = %s
+                ORDER BY s.course_id, s.section_number
+            """, (dept,))
+        else:
+            cursor.execute("""
+                SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
+                       s.room_number, s.capacity, c.department_id, c.c_name
+                FROM section s
+                LEFT JOIN course c ON s.course_id = c.course_id
+                WHERE s.professor_id IS NULL
+                ORDER BY s.course_id, s.section_number
+            """)
+
+        sections = cursor.fetchall()
+
+        cursor.execute("SELECT department_id, d_name FROM department ORDER BY d_name")
+        departments = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'manage_assignments.html',
+        sections=sections,
+        departments=departments,
+        selected_dept=dept
+    )
+
+
+@app.route('/admin/assignments/assign/<section_number>', methods=['GET', 'POST'])
+def assign_section(section_number):
+
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True, buffered=True)
+
+        cursor.execute("""
+            SELECT s.*, c.department_id, c.c_name
+            FROM section s
+            LEFT JOIN course c ON s.course_id = c.course_id
+            WHERE s.section_number = %s
+        """, (section_number,))
+        section = cursor.fetchone()
+
+        if not section:
+            flash("Section not found.")
+            return redirect(url_for('manage_assignments'))
+
+        dept_id = section.get("department_id")
+
+        professors = []
+        if dept_id:
+            cursor.execute("""
+                SELECT professor_id, p_name
+                FROM professor
+                WHERE dept_id = %s
+                ORDER BY p_name
+            """, (dept_id,))
+            professors = cursor.fetchall()
+
+        if request.method == 'POST':
+            action = request.form.get('action')
+
+            if action == 'remove':
+                cursor.execute("""
+                    UPDATE section
+                    SET professor_id = NULL
+                    WHERE section_number = %s
+                """, (section_number,))
+                connection.commit()
+                flash("Professor unassigned from section.")
+                return redirect(url_for('manage_assignments'))
+
+            prof_id = request.form.get('professor_id', '').strip()
+            if not prof_id:
+                flash("Please choose a professor.")
+                return redirect(url_for('assign_section', section_number=section_number))
+
+            cursor.execute("SELECT dept_id FROM professor WHERE professor_id = %s", (prof_id,))
+            prof_row = cursor.fetchone()
+
+            if not prof_row:
+                flash("Selected professor does not exist.")
+                return redirect(url_for('assign_section', section_number=section_number))
+
+            if dept_id and prof_row['dept_id'] != dept_id:
+                flash("Selected professor is not in the same department as the course.")
+                return redirect(url_for('assign_section', section_number=section_number))
+
+            cursor.execute("""
+                UPDATE section
+                SET professor_id = %s
+                WHERE section_number = %s
+            """, (prof_id, section_number))
+            connection.commit()
+
+            flash("Professor assigned/updated successfully.")
+            return redirect(url_for('manage_assignments'))
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        'assign_section.html',
+        section=section,
+        professors=professors
+    )
+
+@app.route('/admin/assignments/assigned')
+def assigned_sections():
+
+    if session.get('role') != 'admin':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True, buffered=True)
+
+        cursor.execute("""
+            SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
+                   s.room_number, s.capacity, s.professor_id,
+                   p.p_name AS prof_name, c.c_name, c.department_id
+            FROM section s
+            LEFT JOIN professor p ON s.professor_id = p.professor_id
+            LEFT JOIN course c ON s.course_id = c.course_id
+            WHERE s.professor_id IS NOT NULL
+            ORDER BY s.course_id, s.section_number
+        """)
+
+        rows = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template('assigned_sections.html', sections=rows)
+
 if __name__ == '__main__':
     app.run(debug=True)
