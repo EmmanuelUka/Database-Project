@@ -3,6 +3,20 @@
     Register and drop classes
 </h1>
 
+<h2>Filter by Semester</h2>
+
+<form action="/student/register/class_list" method="POST">
+    <select name="semester">
+        <option value="all">All Semesters</option>
+        <option value="Fall" {% if selected_semester == "Fall" %}selected{% endif %}>Fall</option>
+        <option value="Spring" {% if selected_semester == "Spring" %}selected{% endif %}>Spring</option>
+        <option value="Summer" {% if selected_semester == "Summer" %}selected{% endif %}>Summer</option>
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+
 <table border="1">
     <tr>
         <th>Section</th>
@@ -22,6 +36,8 @@
         <td>{{ s.year }}</td>
         <td>{{ s.days }}</td>
         <td>{{ s.time }}</td>
+        <td>{{ s.status }}</td>
+
 
         <td>
             <form action="/student/register/drop_class" method="POST">
