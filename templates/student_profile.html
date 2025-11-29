@@ -1,0 +1,26 @@
+<h1>Student Profile</h1>
+
+<table border="1">
+    <tr><th>Name</th><td>{{ student.s_name }}</td></tr>
+    <tr><th>Student ID</th><td>{{ student.student_id }}</td></tr>
+    <tr><th>Department</th><td>{{ student.d_name }}</td></tr>
+    <tr><th>Advisor</th><td>{{ student.advisor }}</td></tr>
+    <tr><th>Total Credits</th><td>{{ student.tot_credits }}</td></tr>
+    <tr><th>GPA</th><td>{{ student.gpa }}</td></tr>
+    <tr><th>Email</th><td>{{ student.email }}</td></tr>
+    <tr><th>Address</th>
+        <td>
+            {{ student.address_houseNumber }}
+            {{ student.address_street }},
+            {{ student.address_city }},
+            {{ student.address_state }}
+            {{ student.address_zip }}
+        </td>
+    </tr>
+</table>
+
+<br><br>
+
+<form action="/student/profile/edit" method="GET">
+    <button type="submit">Edit Profile</button>
+</form>

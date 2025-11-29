@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register for Classes</title>
+</head>
+<body>
+    <h1>Welcome, {{ session.username }} (Student)</h1>
+    <h2>Available Sections</h2>
+
+    {% if sections %}
+        <ul>
+        {% for s in sections %}
+            <li>
+                <strong>{{ s.course_id }} - {{ s.c_name }}</strong>
+                ({{ s.semester }} {{ s.year }}) {{ s.days }} @ {{ s.time }}
+                
+                <form action="/student/register/submit" method="POST" style="display:inline;">
+                    <input type="hidden" name="section_id" value="{{ s.section_number }}">
+                    <button type="submit">Register</button>
+                </form>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No available sections to register.</p>
+    {% endif %}
+
+    <br>
+
+    <h1>Here are your current classes: <a href="/student/register/class_list">here</a> </h1> 
+    
+
+    <br>
+    <form action="{{ url_for('logout') }}">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

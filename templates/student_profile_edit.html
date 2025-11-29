@@ -1,0 +1,18 @@
+<h1>Edit Profile</h1>
+
+<form action="/student/profile/update" method="POST">
+
+    Email: <input type="text" name="email" value="{{ student.email }}"><br><br>
+
+    House Number: <input type="text" name="house" value="{{ student.address_houseNumber }}"><br><br>
+
+    Street: <input type="text" name="street" value="{{ student.address_street }}"><br><br>
+
+    City: <input type="text" name="city" value="{{ student.address_city }}"><br><br>
+
+    State: <input type="text" name="state" value="{{ student.address_state }}"><br><br>
+
+    ZIP: <input type="text" name="zip" value="{{ student.address_zip }}"><br><br>
+
+    <button type="submit">Save Changes</button>
+</form>

@@ -1,0 +1,54 @@
+<h1>Your Registered Classes
+    <br>
+    Register and drop classes
+</h1>
+
+<h2>Filter by Semester</h2>
+
+<form action="/student/register/class_list" method="POST">
+    <select name="semester">
+        <option value="all">All Semesters</option>
+        <option value="Fall" {% if selected_semester == "Fall" %}selected{% endif %}>Fall</option>
+        <option value="Spring" {% if selected_semester == "Spring" %}selected{% endif %}>Spring</option>
+        <option value="Summer" {% if selected_semester == "Summer" %}selected{% endif %}>Summer</option>
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+
+<table border="1">
+    <tr>
+        <th>Section</th>
+        <th>Course</th>
+        <th>Semester</th>
+        <th>Year</th>
+        <th>Days</th>
+        <th>Time</th>
+        <th>Action</th>
+    </tr>
+
+    {% for s in registered_sections %}
+    <tr>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.semester }}</td>
+        <td>{{ s.year }}</td>
+        <td>{{ s.days }}</td>
+        <td>{{ s.time }}</td>
+        <td>{{ s.status }}</td>
+
+
+        <td>
+            <form action="/student/register/drop_class" method="POST">
+                <input type="hidden" name="section_id" value="{{ s.section_number }}">
+                <button type="submit">Drop</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<h1>To Register for more classes, click <a href="/student/register">here</a></h1>   

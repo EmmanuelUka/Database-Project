@@ -80,7 +80,7 @@ insert into teaches values('4592038174', '004', 'HIST210');
 insert into teaches values('5610283947', '005', 'BIO110');
 
 
-insert into takes values ('9515617924', '001', 'A', 'CS101');
+insert into takes values ('9515617924', '001', 'A', 'CS101'); --set grades to null in database
 insert into takes values ('9515617925', '002', 'B', 'MATH201');
 insert into takes values ('9515617926', '003', 'C', 'ENG150');
 insert into takes values ('9515617927', '004', 'A', 'HIST210');
