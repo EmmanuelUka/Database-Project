@@ -11,7 +11,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',         
     'password': '',        
-    'database': 'project'
+    'database': 'euka'
 }
 
 
@@ -21,6 +21,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        
         try:
             connection = mysql.connector.connect(**db_config)
             cursor = connection.cursor(dictionary=True)
