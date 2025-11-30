@@ -5,8 +5,10 @@
 </head>
 <body>
     <h1>Welcome, {{ username }} (Instructor)</h1>
-    <form action="{{ url_for('logout') }}">
-        <button type="submit">Logout</button>
-    </form>
+    <a href="/logout"><button>logout</button></a>
+    <a href="instructor/avg_grades"><button>grade average</button></a>
+    <a href="/instructor/class_avg"><button>class grade average</button></a>
+    <a href="/instructor/class_comparison"><button>class comparison</button></a>
+    <a href="/instructor/student_counts"><button>total students</button></a>  
 </body>
 </html>

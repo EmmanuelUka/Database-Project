@@ -1338,5 +1338,271 @@ def assigned_sections():
 
     return render_template('assigned_sections.html', sections=rows)
 
+
+@app.route('/instructor/avg_grades')
+def avg_grades():
+    if session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                d.department_id,
+                d.d_name,
+                AVG(
+                    CASE t.letter
+                        WHEN 'A' THEN 4
+                        WHEN 'B' THEN 3
+                        WHEN 'C' THEN 2
+                        WHEN 'D' THEN 1
+                        WHEN 'F' THEN 0
+                    END
+                ) AS avg_grade
+            FROM department d
+            JOIN student s ON s.dept_id = d.department_id
+            JOIN takes t ON t.student_id = s.student_id
+            GROUP BY d.department_id, d.d_name
+            ORDER BY d.d_name
+        """)
+        rows = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template("avg_grades.html", rows=rows)
+
+
+@app.route('/instructor/class_avg', methods=['GET', 'POST'])
+def class_avg():
+
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("SELECT course_id, c_name FROM course ORDER BY c_name")
+    courses = cursor.fetchall()
+
+    result = None
+    selected = None
+
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        start_sem = request.form["start_sem"]
+        start_year = request.form["start_year"]
+        end_sem = request.form["end_sem"]
+        end_year = request.form["end_year"]
+
+        selected = {
+            "course_id": course_id,
+            "start_sem": start_sem,
+            "start_year": start_year,
+            "end_sem": end_sem,
+            "end_year": end_year
+        }
+
+        query = """
+        SELECT 
+            AVG(
+                CASE 
+                    WHEN t.letter = 'A' THEN 4
+                    WHEN t.letter = 'B' THEN 3
+                    WHEN t.letter = 'C' THEN 2
+                    WHEN t.letter = 'D' THEN 1
+                    WHEN t.letter = 'F' THEN 0
+                END
+            ) AS avg_grade
+        FROM takes t
+        JOIN section s ON t.section_number = s.section_number
+        WHERE s.course_id = %s
+          AND (
+                (s.year > %s AND s.year < %s)
+                OR (s.year = %s AND 
+                    CASE s.semester 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                    >= 
+                    CASE %s 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                )
+                OR (s.year = %s AND 
+                    CASE s.semester 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                    <= 
+                    CASE %s 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                )
+              )
+        """
+
+        cursor.execute(query, (
+            course_id,
+            start_year, end_year,
+            start_year, start_sem,
+            end_year, end_sem
+        ))
+
+        row = cursor.fetchone()
+        result = row["avg_grade"]
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        "class_avg.html",
+        courses=courses,
+        result=result,
+        selected=selected
+    )
+
+
+@app.route('/instructor/class_comparison', methods=['GET', 'POST'])
+def class_comparison():
+
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    best = None
+    worst = None
+    classes = []
+    selected = None
+
+    if request.method == "POST":
+        sem = request.form["semester"]
+        year = request.form["year"]
+        selected = {"semester": sem, "year": year}
+
+        grade_map = {'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0}
+
+        query = """
+            SELECT c.course_id, c.c_name, t.letter
+            FROM course c
+            JOIN section s ON c.course_id = s.course_id
+            JOIN takes t ON t.section_number = s.section_number
+            WHERE s.semester = %s AND s.year = %s
+        """
+
+        cursor.execute(query, (sem, year))
+        rows = cursor.fetchall()
+
+        grade_data = {}
+
+        for r in rows:
+            val = grade_map.get(r['letter'])
+            if val is None:
+                continue
+
+            cid = r['course_id']
+            if cid not in grade_data:
+                grade_data[cid] = {
+                    "name": r['c_name'],
+                    "grades": []
+                }
+
+            grade_data[cid]["grades"].append(val)
+
+        for course_id, info in grade_data.items():
+            avg = sum(info["grades"]) / len(info["grades"])
+            classes.append({
+                "course_id": course_id,
+                "name": info["name"],
+                "avg": avg
+            })
+
+        if classes:
+            best = max(classes, key=lambda x: x['avg'])
+            worst = min(classes, key=lambda x: x['avg'])
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        "class_comparison.html",
+        best=best,
+        worst=worst,
+        selected=selected
+    )
+
+
+@app.route('/instructor/student_counts')
+def student_counts():
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT d.department_id, d.d_name,
+               COUNT(s.student_id) AS current_students
+        FROM department d
+        LEFT JOIN student s ON s.dept_id = d.department_id
+        GROUP BY d.department_id, d.d_name
+        ORDER BY d.d_name
+    """)
+    current_rows = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT d.department_id, d.d_name,
+               COUNT(DISTINCT t.student_id) AS past_students
+        FROM department d
+        LEFT JOIN takes t ON TRUE
+        LEFT JOIN student s ON s.student_id = t.student_id
+        WHERE s.student_id IS NULL
+        GROUP BY d.department_id, d.d_name
+        ORDER BY d.d_name
+    """)
+    past_rows = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    result = []
+    past_map = {row['department_id']: row['past_students'] for row in past_rows}
+
+    for row in current_rows:
+        dept_id = row['department_id']
+        current = row['current_students']
+        past = past_map.get(dept_id, 0)
+        total = current + past
+
+        result.append({
+            "department_id": dept_id,
+            "d_name": row['d_name'],
+            "current": current,
+            "past": past,
+            "total": total
+        })
+
+    return render_template("student_counts.html", rows=result)
+
+
 if __name__ == '__main__':
     app.run(debug=True)

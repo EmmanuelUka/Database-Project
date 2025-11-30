@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Semester Performance</title>
+    <style>
+        body { font-family: Arial; background:#eef2f7; padding:30px; }
+        .box {
+            background:white; padding:20px; width:450px; margin:auto;
+            border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15);
+        }
+        select, input {
+            width:100%; padding:8px; margin:10px 0;
+            border-radius:5px; border:1px solid #bbb;
+        }
+        button {
+            padding:10px 15px; width:100%;
+            background:#4CAF50; color:white;
+            border:none; border-radius:6px; font-size:16px;
+        }
+        .result-box {
+            margin-top:20px; padding:15px; background:#e6f2ff;
+            border-left:5px solid #428bca; border-radius:4px;
+        }
+        .return-btn {
+            display:inline-block; padding:8px 12px;
+            background:#bbb; color:black; text-decoration:none;
+            border-radius:5px; margin-bottom:10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+
+    <a href="/instructor" class="return-btn">Return</a>
+    <h2>Best & Worst Classes for a Semester</h2>
+
+    <form method="POST">
+
+        <label>Semester:</label>
+        <select name="semester" required>
+            {% set sems = ['Spring','Summer','Fall','Winter'] %}
+            {% for s in sems %}
+                <option value="{{ s }}"
+                    {% if selected and selected.semester == s %}selected{% endif %}>
+                    {{ s }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Year:</label>
+        <input type="number" name="year" required
+            value="{{ selected.year if selected }}">
+
+        <button type="submit">Show Performance</button>
+    </form>
+
+    {% if best %}
+    <div class="result-box">
+        <h3>Best Performing Class</h3>
+        <p><strong>{{ best.name }}</strong> — Average: {{ "%.2f"|format(best.avg) }}</p>
+    </div>
+    {% endif %}
+
+    {% if worst %}
+    <div class="result-box">
+        <h3>Worst Performing Class</h3>
+        <p><strong>{{ worst.name }}</strong> — Average: {{ "%.2f"|format(worst.avg) }}</p>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>
