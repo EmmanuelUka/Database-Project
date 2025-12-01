@@ -8,6 +8,7 @@
         th, td { border: 1px solid #ccc; padding: 12px; text-align: left; }
         th { background-color: #4CAF50; color: white; }
         tr:hover { background-color: #f1f1f1; }
+        button, a.button { margin:5px; padding:8px 12px; }
     </style>
 </head>
 <body>
@@ -52,7 +53,9 @@
         <td>{{ s.b_name }}</td>
         <td>{{ s.room_number }}</td>
         <td>
-            <a href="{{ url_for('assign_section', section_number=s.section_number) }}"><button>Change / Unassign</button></a>
+            <a href="{{ url_for('assign_section', course_id=s.course_id, section_number=s.section_number) }}">
+                <button>Change / Unassign</button>
+            </a>
         </td>
     </tr>
     {% endfor %}

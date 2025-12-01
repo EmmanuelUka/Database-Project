@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Your Sections</title>
+    <title>Your Sections — {{ semester }} {{ year }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,33 +42,44 @@
 </head>
 <body>
 
-<h1>Your Semesters</h1>
+<h1>Sections — {{ semester }} {{ year }}</h1>
 
 <a href="/instructor" class="button">Return</a>
+<a href="{{ url_for('instructor_sections') }}" class="button">Back to Semesters</a>
 
 <br><br>
 
-{% if semesters %}
+{% if sections %}
 <table>
     <tr>
-        <th>Semester</th>
-        <th>Year</th>
-        <th>View</th>
+        <th>Course ID</th>
+        <th>Course Name</th>
+        <th>Section #</th>
+        <th>Days</th>
+        <th>Time</th>
+        <th>Location</th>
+        <th>Capacity</th>
+        <th>Roster</th>
     </tr>
-    {% for sem in semesters %}
+    {% for s in sections %}
     <tr>
-        <td>{{ sem.semester }}</td>
-        <td>{{ sem.year }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.c_name }}</td>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.days or '' }}</td>
+        <td>{{ s.time or '' }}</td>
+        <td>{{ s.b_name or '' }} {{ s.room_number or '' }}</td>
+        <td>{{ s.capacity or '' }}</td>
         <td>
-            <a class="button" href="{{ url_for('instructor_sections_by_semester', semester=sem.semester, year=sem.year) }}">
-                View Sections
+            <a class="button" href="{{ url_for('section_roster', course_id=s.course_id, section_number=s.section_number) }}">
+                View Roster
             </a>
         </td>
     </tr>
     {% endfor %}
 </table>
 {% else %}
-    <p>No sections found for you.</p>
+    <p>No sections found for this semester.</p>
 {% endif %}
 
 </body>
