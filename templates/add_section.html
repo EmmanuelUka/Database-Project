@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html>
+{% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 <head>
     <title>Add Section</title>
 </head>
@@ -14,11 +21,11 @@
     <label>Course ID:</label><br>
     <input type="text" name="course_id" required><br><br>
 
-    <label>Professor ID:</label><br>
-    <input type="text" name="professor_id" required><br><br>
-
     <label>Semester (Fall, Spring, Summer, Winter):</label><br>
     <input type="text" name="semester" required><br><br>
+
+    <label>Year:</label><br>
+    <input type="text" name="year" required><br><br>
 
     <label>Building Name:</label><br>
     <input type="text" name="b_name" required><br><br>
