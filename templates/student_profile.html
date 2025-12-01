@@ -1,0 +1,34 @@
+<head>
+    <title>Student Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+</head>
+
+<div class="card" style="width: 60rem;">
+  <div class="card-body">
+    <h1 class="card-title">Student Profile</h1>
+    <h1 class="card-title">Welcome, {{ student.s_name }}</h1>
+    <p class="card-text">
+        <strong>ID:</strong> {{ student.student_id }} <br>
+        <strong>Email:</strong> {{student.email}} <br>
+        <strong>Major:</strong> {{ student.d_name }} <br>
+        <strong>Total Credits:</strong> {{ student.tot_credits }} <br>
+        <strong>Advisor:</strong> {{ student.p_name or "Not Assigned" }} <br>
+        <strong>GPA:</strong> {{ student.gpa }} <br>
+        <strong>Address:</strong> {{ student.address_houseNumber }} {{ student.address_street }}, {{ student.address_city }}, 
+                                    {{ student.address_state }} {{ student.address_zip }}<br>
+    </p>
+
+    <!--<a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>-->
+  </div>
+</div>
+
+<div>
+    <form action="/student/profile/edit" method="GET">
+        <button class="btn btn-primary">Edit Profile</button>
+    </form>
+</div>

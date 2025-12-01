@@ -1,0 +1,37 @@
+<h1>Submit Grades — Section {{ section_number }}</h1>
+
+<table border="1">
+    <tr>
+        <th>Student</th>
+        <th>ID</th>
+        <th>Current Grade</th>
+        <th>Enter Grade</th>
+        <th>Action</th>
+    </tr>
+
+    {% for s in students %}
+    <tr>
+        <td>{{ s.s_name }}</td>
+        <td>{{ s.student_id }}</td>
+        <td>{{ s.letter if s.letter else "N/A" }}</td>
+
+        <td>
+            <form action="/instructor/submit_grade" method="POST">
+                <input type="hidden" name="student_id" value="{{ s.student_id }}">
+                <input type="hidden" name="section_number" value="{{ section_number }}">
+
+                <select name="letter">
+                    <option value="">---</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="F">F</option>
+                </select>
+
+                <button type="submit">Save</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

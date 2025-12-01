@@ -1,0 +1,22 @@
+body {
+  background: rgb(192, 247, 255);
+}
+
+
+.btn-primary {
+  background-color: rgb(28, 30, 30);
+  position: absolute;
+  top: 500px;
+}
+
+.profile-glyphicon {
+  position: absolute;
+  top: 70px;     
+  right: 10px;
+}
+
+.card {
+  position: absolute;
+  left:10px;
+}
+

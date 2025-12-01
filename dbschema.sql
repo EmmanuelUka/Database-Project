@@ -46,7 +46,7 @@ create table users (
 create table professor (
     professor_id varchar(10) primary key,
     p_name varchar(25) not null,
-    dept_id varchar(4),
+    department_id varchar(4),
     salary numeric(6,2),
     email varchar(30),
     address_houseNumber varchar(4),
@@ -54,14 +54,14 @@ create table professor (
     address_city varchar(25),
     address_state varchar(15),
     address_zip numeric(5,0),
-    foreign key (dept_id) references department(department_id),
+    foreign key (department_id) references department(department_id),
     foreign key (professor_id) references users(user_id)
 );
 
 create table student (
     student_id varchar(10) primary key,
     s_name varchar(25) not null,
-    dept_id varchar(4),
+    department_id varchar(4),
     tot_credits numeric(2,0),
     gpa decimal(3,2),
     email varchar(30),
@@ -70,7 +70,7 @@ create table student (
     address_city varchar(25),
     address_state varchar(15),
     address_zip numeric(5,0),
-    foreign key (dept_id) references department(department_id),
+    foreign key (department_id) references department(department_id),
     foreign key (student_id) references users(user_id)
 );
 

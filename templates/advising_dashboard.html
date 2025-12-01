@@ -1,0 +1,87 @@
+<!-- templates/advising_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advising Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Advising Dashboard</h1>
+    
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- My Advisees -->
+    <h2>My Advisees</h2>
+    {% if advisees %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in advisees %}
+            <tr>
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.s_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>
+                    <form action="{{ url_for('remove_advisee') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="student_id" value="{{ student.student_id }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>You have no advisees yet.</p>
+    {% endif %}
+
+    <!-- Eligible Students -->
+    <h2>Eligible Students in Your Department</h2>
+    {% if eligible_students %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in eligible_students %}
+            <tr>
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.s_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>
+                    <form action="{{ url_for('add_advisee') }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="student_id" value="{{ student.student_id }}">
+                        <button type="submit">Add</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No eligible students in your department.</p>
+    {% endif %}
+
+</body>
+</html>
