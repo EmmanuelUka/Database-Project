@@ -2,9 +2,40 @@
 <html>
 <head>
     <title>Instructor Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
+
+
 <body>
+
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/instructor">Instructor Portal</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Profile</a></li>
+      <li><a href="/instructor/sections">Grades</a></li>
+      <li><a href="/instructor/advising">Advisor</a></li>
+      <li><a href="/instructor/prerequisites">Course Prerequisites</a></li>
+    </ul>
+  </div>
+</nav>
+  
+<div class="container">
+  <h3>Basic Navbar Example</h3>
+  <p>A navigation bar is a navigation header that is placed at the top of the page.</p>
+</div>
+
+
     <h1>Welcome, {{ username }} (Instructor)</h1>
+
+    <h1>Your Courses</h1>
+
     <form action="{{ url_for('logout') }}">
         <button type="submit">Logout</button>
     </form>
