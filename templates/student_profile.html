@@ -17,7 +17,7 @@
         <strong>Email:</strong> {{student.email}} <br>
         <strong>Major:</strong> {{ student.d_name }} <br>
         <strong>Total Credits:</strong> {{ student.tot_credits }} <br>
-        <strong>Advisor:</strong> {{ student.advisor }} <br>
+        <strong>Advisor:</strong> {{ student.p_name or "Not Assigned" }} <br>
         <strong>GPA:</strong> {{ student.gpa }} <br>
         <strong>Address:</strong> {{ student.address_houseNumber }} {{ student.address_street }}, {{ student.address_city }}, 
                                     {{ student.address_state }} {{ student.address_zip }}<br>

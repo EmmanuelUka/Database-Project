@@ -1,0 +1,45 @@
+<h1>Manage Prerequisites</h1>
+
+<h2>Select a Course</h2>
+<form method="get">
+    <select name="course_id" onchange="this.form.submit()">
+        <option value="">-- Choose a course --</option>
+        {% for c in courses %}
+            <option value="{{ c.course_id }}" {% if c.course_id == selected_course_id %}selected{% endif %}>
+                {{ c.c_name }} ({{ c.course_id }})
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+{% if selected_course_id %}
+    <h2>Current Prerequisites for {{ selected_course_id }}</h2>
+    {% if prerequisites %}
+        <ul>
+            {% for p in prerequisites %}
+                <li>
+                    {{ p.c_name }} ({{ p.course_id }})
+                    <form method="POST" action="{{ url_for('remove_prerequisite') }}" style="display:inline;">
+                        <input type="hidden" name="course_id" value="{{ selected_course_id }}">
+                        <input type="hidden" name="prereq_id" value="{{ p.course_id }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No prerequisites yet.</p>
+    {% endif %}
+
+    <h2>Add a Prerequisite</h2>
+    <form method="POST" action="{{ url_for('add_prerequisite') }}">
+        <input type="hidden" name="course_id" value="{{ selected_course_id }}">
+        <select name="prereq_id" required>
+            <option value="">Select a course</option>
+            {% for c in available_courses %}
+                <option value="{{ c.course_id }}">{{ c.c_name }} ({{ c.course_id }})</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Add</button>
+    </form>
+{% endif %}

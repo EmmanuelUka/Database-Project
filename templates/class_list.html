@@ -5,15 +5,15 @@
 
 <h2>Filter by Semester</h2>
 
-<form action="/student/register/class_list" method="POST">
-    <select name="semester">
+<form action="/student/register/class_list" method="POST" class="form-inline mb-3">
+    <label for="semester" class="mr-2">Filter by Semester:</label>
+    <select name="semester" id="semester" class="form-control mr-2">
         <option value="all">All Semesters</option>
         <option value="Fall" {% if selected_semester == "Fall" %}selected{% endif %}>Fall</option>
         <option value="Spring" {% if selected_semester == "Spring" %}selected{% endif %}>Spring</option>
         <option value="Summer" {% if selected_semester == "Summer" %}selected{% endif %}>Summer</option>
     </select>
-
-    <button type="submit">Filter</button>
+    <button type="submit" class="btn btn-primary">Filter</button>
 </form>
 
 
@@ -42,7 +42,7 @@
         <td>
             <form action="/student/register/drop_class" method="POST">
                 <input type="hidden" name="section_id" value="{{ s.section_number }}">
-                <button type="submit">Drop</button>
+                <button type="submit" class="btn btn-danger">Drop</button>
             </form>
         </td>
     </tr>

@@ -1,0 +1,21 @@
+<h1>Your Sections</h1>
+
+<table border="1">
+    <tr>
+        <th>Section</th>
+        <th>Course</th>
+        <th>Semester</th>
+        <th>Action</th>
+    </tr>
+
+    {% for s in sections %}
+    <tr>
+        <td>{{ s.section_number }}</td>
+        <td>{{ s.course_id }}</td>
+        <td>{{ s.semester }} {{ s.year }}</td>
+        <td>
+            <a href="/instructor/grade/{{ s.section_number }}">Enter Grades</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

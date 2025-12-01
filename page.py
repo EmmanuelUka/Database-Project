@@ -299,10 +299,13 @@ def student_profile():
 
         cursor.execute("""                                                                          
             SELECT s.student_id, s.s_name, s.tot_credits, s.gpa, s.email, d.d_name,
-            s.address_houseNumber, s.address_street, s.address_city, s.address_state, s.address_zip, s.advisor
+                s.address_houseNumber, s.address_street, s.address_city, s.address_state, s.address_zip,
+                p.professor_id, p.p_name
             FROM student s
             LEFT JOIN department d ON s.dept_id = d.department_id
+            LEFT JOIN professor p ON s.advisor = p.professor_id
             WHERE s.student_id = %s
+
         """, (student_id,))
 
         student_info = cursor.fetchone()
@@ -1633,6 +1636,285 @@ def assigned_sections():
         connection.close()
 
     return render_template('assigned_sections.html', sections=rows)
+
+
+@app.route("/instructor/grade/<section_number>")
+def grade_section(section_number):
+    if not session.get("user_id") or session.get("role") != "instructor":
+        flash("Unauthorized access.")
+        return redirect(url_for("login"))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT t.student_id, s.s_name, t.letter
+            FROM takes t
+            JOIN student s ON s.student_id = t.student_id
+            WHERE t.section_number = %s
+        """, (section_number,))
+
+        students = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template("grade_section.html", section_number=section_number, students=students)
+
+@app.route("/instructor/sections")
+def instructor_sections():
+    if not session.get("user_id") or session.get("role") != "instructor":
+        flash("Unauthorized access.")
+        return redirect(url_for("login"))
+
+    professor_id = session["user_id"]
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT s.section_number, s.course_id, s.semester, s.year
+            FROM section s
+            WHERE s.professor_id = %s
+        """, (professor_id,))
+
+        sections = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template("instructor_sections.html", sections=sections)
+
+
+@app.route("/instructor/submit_grade", methods=["POST"])
+def submit_grade():
+    if not session.get("user_id") or session.get("role") != "instructor":
+        flash("Unauthorized access.")
+        return redirect(url_for("login"))
+
+    student_id = request.form["student_id"]
+    section_number = request.form["section_number"]
+    grade = request.form["letter"]
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE takes 
+            SET letter = %s 
+            WHERE student_id = %s AND section_number = %s
+        """, (grade, student_id, section_number))
+
+        connection.commit()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    flash("Grade submitted successfully.")
+    return redirect(url_for("grade_section", section_number=section_number))
+
+
+@app.route('/instructor/advising')
+def advising_dashboard():
+    if not session.get('user_id') or session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Get professor's department
+        cursor.execute("SELECT dept_id FROM professor WHERE professor_id = %s", (professor_id,))
+        prof_dept = cursor.fetchone()['dept_id']
+
+        # Students this professor already advises
+        cursor.execute("""
+            SELECT student_id, s_name, email, dept_id
+            FROM student
+            WHERE advisor = %s
+        """, (professor_id,))
+        advisees = cursor.fetchall()
+
+        # Students from same department not advised by this professor
+        cursor.execute("""
+            SELECT student_id, s_name, email, dept_id
+            FROM student
+            WHERE dept_id = %s AND (advisor IS NULL OR advisor != %s)
+        """, (prof_dept, professor_id))
+        eligible_students = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        "advising_dashboard.html",
+        advisees=advisees,
+        eligible_students=eligible_students
+    )
+
+
+@app.route('/instructor/advising/add', methods=['POST'])
+def add_advisee():
+    if not session.get('user_id') or session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+    student_id = request.form['student_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        # Safe to update since foreign key ensures student exists
+        cursor.execute("UPDATE student SET advisor = %s WHERE student_id = %s", (professor_id, student_id))
+        connection.commit()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    flash("Student added as advisee.")
+    return redirect(url_for('advising_dashboard'))
+
+
+@app.route('/instructor/advising/remove', methods=['POST'])
+def remove_advisee():
+    if not session.get('user_id') or session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+    student_id = request.form['student_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor()
+
+        # Extra safety: only remove if current professor is advisor
+        cursor.execute("SELECT advisor FROM student WHERE student_id = %s", (student_id,))
+        current_advisor = cursor.fetchone()[0]
+
+        if current_advisor != professor_id:
+            flash("You can only remove your own advisees.")
+            return redirect(url_for('advising_dashboard'))
+
+        cursor.execute("UPDATE student SET advisor = NULL WHERE student_id = %s", (student_id,))
+        connection.commit()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    flash("Student removed from advisee list.")
+    return redirect(url_for('advising_dashboard'))
+
+
+@app.route('/instructor/prerequisites', methods=['GET', 'POST'])
+def manage_prerequisites():
+    if not session.get('user_id') or session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        # Get all courses this professor teaches
+        cursor.execute("""
+            SELECT s.course_id, c.c_name
+            FROM section s
+            JOIN course c ON s.course_id = c.course_id
+            WHERE s.professor_id = %s
+            GROUP BY s.course_id
+        """, (professor_id,))
+        courses = cursor.fetchall()
+
+        # If a course is selected via query param, get its prerequisites
+        selected_course_id = request.args.get('course_id')
+        prerequisites = []
+        available_courses = []
+
+        if selected_course_id:
+            # Get current prerequisites
+            cursor.execute("""
+                SELECT c.course_id, c.c_name
+                FROM course_prerequisite cp
+                JOIN course c ON cp.prereq_id = c.course_id
+                WHERE cp.course_id = %s
+            """, (selected_course_id,))
+            prerequisites = cursor.fetchall()
+
+            # Get all other courses in same department as possible prerequisites
+            cursor.execute("""
+                SELECT course_id, c_name
+                FROM course
+                WHERE course_id != %s
+            """, (selected_course_id,))
+            available_courses = cursor.fetchall()
+
+    finally:
+        cursor.close()
+        connection.close()
+
+    return render_template(
+        "manage_prerequisites.html",
+        courses=courses,
+        selected_course_id=selected_course_id,
+        prerequisites=prerequisites,
+        available_courses=available_courses
+    )
+
+
+@app.route('/instructor/prerequisites/add', methods=['POST'])
+def add_prerequisite():
+    course_id = request.form['course_id']
+    prereq_id = request.form['prereq_id']
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    cursor.execute("""
+        INSERT IGNORE INTO course_prerequisite (course_id, prereq_id)
+        VALUES (%s, %s)
+    """, (course_id, prereq_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    flash("Prerequisite added.")
+    return redirect(url_for('manage_prerequisites', course_id=course_id))
+
+
+@app.route('/instructor/prerequisites/remove', methods=['POST'])
+def remove_prerequisite():
+    course_id = request.form['course_id']
+    prereq_id = request.form['prereq_id']
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor()
+    cursor.execute("""
+        DELETE FROM course_prerequisite
+        WHERE course_id = %s AND prereq_id = %s
+    """, (course_id, prereq_id))
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+    flash("Prerequisite removed.")
+    return redirect(url_for('manage_prerequisites', course_id=course_id))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
