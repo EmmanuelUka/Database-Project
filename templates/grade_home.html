@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Section to Grade</title>
+</head>
+<body>
+
+    <h2>Select a Section to Grade</h2>
+
+    {% if sections %}
+        <table border="1">
+            <tr>
+                <th>Section</th>
+                <th>Course ID</th>
+                <th>Semester</th>
+                <th>Year</th>
+                <th>Action</th>
+            </tr>
+
+            {% for sec in sections %}
+            <tr>
+                <td>{{ sec.section_number }}</td>
+                <td>{{ sec.course_id }}</td>
+                <td>{{ sec.semester }}</td>
+                <td>{{ sec.year }}</td>
+                <td>
+                    <a href="{{ url_for('grade_section', section_number=sec.section_number) }}">
+                        Grade Students
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+    {% else %}
+        <p><strong>No sections assigned to you.</strong></p>
+    {% endif %}
+
+</body>
+</html>

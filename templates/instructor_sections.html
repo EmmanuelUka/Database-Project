@@ -2,49 +2,45 @@
 <html>
 <head>
     <title>Your Sections</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f6fa;
-            padding: 30px;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            background: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        a.button {
-            display: inline-block;
-            padding: 8px 12px;
-            margin: 5px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        a.button:hover {
-            background-color: #45a049;
-        }
-    </style>
+     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+
 </head>
+
+
 <body>
+
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Instructor Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="/instructor/sections">Grades</a></li>
+            <li ><a href="/instructor/advising">Advisor</a></li>
+            <li><a href="/instructor/prerequisites">Course Prerequisites</a></li>
+            <li class="active"><a href="/instructor/sections">Section</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="#" >
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
+  </div>
+</nav>
+
+
+
 
 <h1>Your Semesters</h1>
 
-<a href="/instructor" class="button">Return</a>
+<a href="/instructor" class="btn btn-success">Return</a>
 
 <br><br>
 

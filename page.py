@@ -11,7 +11,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',         
     'password': '',        
-    'database': 'project'
+    'database': 'euka'
 }
 
 
@@ -21,6 +21,8 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        connection = None
+        cursor = None
         
         try:
             connection = mysql.connector.connect(**db_config)
@@ -1927,7 +1929,6 @@ def instructor_sections():
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor(dictionary=True)
 
-        # distinct semesters/years where this professor has sections via teaches
         cur.execute("""
             SELECT DISTINCT s.semester, s.year
             FROM section s
@@ -1947,7 +1948,7 @@ def instructor_sections():
 
 
 # -------------------------------
-# Instructor: view all sections in semester/year
+# Instructor: view sections inside semester
 # -------------------------------
 @app.route('/instructor/sections/<semester>/<int:year>')
 def instructor_sections_by_semester(semester, year):
@@ -1961,7 +1962,6 @@ def instructor_sections_by_semester(semester, year):
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor(dictionary=True)
 
-        # Get sections for this prof/semester/year — join via teaches to ensure ownership
         cur.execute("""
             SELECT s.section_number, s.course_id, c.c_name,
                    s.semester, s.year, s.days, s.time, s.b_name, s.room_number, s.capacity
@@ -1975,7 +1975,6 @@ def instructor_sections_by_semester(semester, year):
               AND s.year = %s
             ORDER BY s.course_id, s.section_number
         """, (professor_id, semester, year))
-
         sections = cur.fetchall()
 
     finally:
@@ -1991,7 +1990,7 @@ def instructor_sections_by_semester(semester, year):
 
 
 # -------------------------------
-# Instructor: view roster for a specific course_id + section_number
+# Instructor: Roster (NOW ALSO handles grade changes + removals)
 # -------------------------------
 @app.route('/instructor/sections/<course_id>/<section_number>/roster')
 def section_roster(course_id, section_number):
@@ -2005,21 +2004,17 @@ def section_roster(course_id, section_number):
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor(dictionary=True)
 
-        # Verify professor actually teaches this specific course+section
+        # Verify instructor teaches this class
         cur.execute("""
-            SELECT 1
-            FROM teaches
-            WHERE professor_id = %s
-              AND course_id = %s
-              AND section_number = %s
+            SELECT 1 FROM teaches
+            WHERE professor_id = %s AND course_id = %s AND section_number = %s
         """, (professor_id, course_id, section_number))
+
         if not cur.fetchone():
-            cur.close()
-            conn.close()
-            flash("You do not teach that section.")
+            flash("You do not teach this section.")
             return redirect(url_for('instructor_sections'))
 
-        # Get section header info
+        # Section info
         cur.execute("""
             SELECT s.section_number, s.course_id, c.c_name, s.semester, s.year
             FROM section s
@@ -2028,7 +2023,7 @@ def section_roster(course_id, section_number):
         """, (course_id, section_number))
         section = cur.fetchone()
 
-        # Get roster (note: we include course_id in WHERE to avoid collisions)
+        # Students + grades
         cur.execute("""
             SELECT t.student_id, st.s_name, st.email, t.letter
             FROM takes t
@@ -2050,45 +2045,30 @@ def section_roster(course_id, section_number):
 
 
 # -------------------------------
-# Instructor: remove a student from a specific course_id + section_number
+# Instructor: Update/Assign Grade
 # -------------------------------
-@app.route('/instructor/sections/<course_id>/<section_number>/remove_student', methods=['POST'])
-def remove_student(course_id, section_number):
+@app.route('/instructor/sections/<course_id>/<section_number>/update_grade', methods=['POST'])
+def update_grade(course_id, section_number):
     if 'user_id' not in session or session.get('role') != 'instructor':
-        flash("Please log in as instructor.")
+        flash("Unauthorized.")
         return redirect(url_for('login'))
 
-    student_id = request.form.get('student_id', '').strip()
-    if not student_id:
-        flash("No student selected.")
-        return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
-
-    professor_id = session['user_id']
+    student_id = request.form['student_id']
+    grade = request.form['grade']
 
     try:
         conn = mysql.connector.connect(**db_config)
-        cur = conn.cursor(dictionary=True)
+        cur = conn.cursor()
 
-        # Verify professor teaches this course+section (safety)
         cur.execute("""
-            SELECT 1
-            FROM teaches
-            WHERE professor_id = %s AND course_id = %s AND section_number = %s
-        """, (professor_id, course_id, section_number))
-        if not cur.fetchone():
-            flash("Unauthorized.")
-            cur.close()
-            conn.close()
-            return redirect(url_for('instructor_sections'))
-
-        # Delete from takes using student_id + section_number + course_id to avoid collisions
-        cur.execute("""
-            DELETE FROM takes
-            WHERE student_id = %s AND section_number = %s AND course_id = %s
-        """, (student_id, section_number, course_id))
+            UPDATE takes
+            SET letter = %s
+            WHERE student_id = %s AND course_id = %s AND section_number = %s
+        """, (grade, student_id, course_id, section_number))
         conn.commit()
 
-        flash("Student removed from section.")
+        flash("Grade updated.")
+
     finally:
         cur.close()
         conn.close()
@@ -2096,87 +2076,34 @@ def remove_student(course_id, section_number):
     return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
 
 
+# -------------------------------
+# Instructor: Remove student from class
+# -------------------------------
+@app.route('/instructor/sections/<course_id>/<section_number>/remove_student', methods=['POST'])
+def remove_student(course_id, section_number):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        flash("Unauthorized.")
+        return redirect(url_for('login'))
 
-@app.route("/instructor/grade/<section_number>")
-def grade_section(section_number):
-    if not session.get("user_id") or session.get("role") != "instructor":
-        flash("Unauthorized access.")
-        return redirect(url_for("login"))
-
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT t.student_id, s.s_name, t.letter
-            FROM takes t
-            JOIN student s ON s.student_id = t.student_id
-            WHERE t.section_number = %s
-        """, (section_number,))
-
-        students = cursor.fetchall()
-
-    finally:
-        cursor.close()
-        connection.close()
-
-    return render_template("grade_section.html", section_number=section_number, students=students)
-
-@app.route("/instructor/sections")
-def instructor_sections():
-    if not session.get("user_id") or session.get("role") != "instructor":
-        flash("Unauthorized access.")
-        return redirect(url_for("login"))
-
-    professor_id = session["user_id"]
+    student_id = request.form['student_id']
 
     try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True)
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor()
 
-        cursor.execute("""
-            SELECT s.section_number, s.course_id, s.semester, s.year
-            FROM section s
-            WHERE s.professor_id = %s
-        """, (professor_id,))
+        cur.execute("""
+            DELETE FROM takes
+            WHERE student_id = %s AND course_id = %s AND section_number = %s
+        """, (student_id, course_id, section_number))
+        conn.commit()
 
-        sections = cursor.fetchall()
-
-    finally:
-        cursor.close()
-        connection.close()
-
-    return render_template("instructor_sections.html", sections=sections)
-
-
-@app.route("/instructor/submit_grade", methods=["POST"])
-def submit_grade():
-    if not session.get("user_id") or session.get("role") != "instructor":
-        flash("Unauthorized access.")
-        return redirect(url_for("login"))
-
-    student_id = request.form["student_id"]
-    section_number = request.form["section_number"]
-    grade = request.form["letter"]
-
-    try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            UPDATE takes 
-            SET letter = %s 
-            WHERE student_id = %s AND section_number = %s
-        """, (grade, student_id, section_number))
-
-        connection.commit()
+        flash("Student removed from section.")
 
     finally:
-        cursor.close()
-        connection.close()
+        cur.close()
+        conn.close()
 
-    flash("Grade submitted successfully.")
-    return redirect(url_for("grade_section", section_number=section_number))
+    return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
 
 
 @app.route('/instructor/advising')

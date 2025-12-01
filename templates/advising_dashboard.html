@@ -1,12 +1,36 @@
-<!-- templates/advising_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>Advising Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
 </head>
 <body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Instructor Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="#">Dashboard</a></li>
+            <li><a href="/instructor/sections">Grades</a></li>
+            <li class="active"><a href="/instructor/advising">Advisor</a></li>
+            <li><a href="/instructor/prerequisites">Course Prerequisites</a></li>
+            <li><a href="/instructor/sections">Section</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="#" >
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
+  </div>
+</nav>
+
     <h1>Advising Dashboard</h1>
     
     {% with messages = get_flashed_messages() %}
