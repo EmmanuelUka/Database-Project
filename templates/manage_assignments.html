@@ -68,7 +68,9 @@
         <td>{{ s.room_number }}</td>
         <td>{{ s.capacity }}</td>
         <td>
-            <a href="{{ url_for('assign_section', section_number=s.section_number) }}"><button>Assign</button></a>
+            <a href="{{ url_for('assign_section', section_number=s.section_number, course_id=s.course_id) }}">
+                <button>Assign</button>
+            </a>
         </td>
     </tr>
     {% endfor %}

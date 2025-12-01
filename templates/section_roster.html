@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Roster — {{ section.course_id }} {{ section.section_number }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f6fa;
+            padding: 30px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        a.button {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a.button:hover {
+            background-color: #45a049;
+        }
+        form.inline { display:inline; margin:0; padding:0; }
+    </style>
+</head>
+<body>
+
+<h1>Roster — {{ section.course_id }} Section {{ section.section_number }}</h1>
+<p>{{ section.c_name }} — {{ section.semester }} {{ section.year }}</p>
+
+<a href="/instructor" class="button">Return</a>
+<a href="{{ url_for('instructor_sections_by_semester', semester=section.semester, year=section.year) }}" class="button">Back to Sections</a>
+
+<br><br>
+
+{% if students %}
+<table>
+    <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Grade</th>
+        <th>Action</th>
+    </tr>
+    {% for stu in students %}
+    <tr>
+        <td>{{ stu.student_id }}</td>
+        <td>{{ stu.s_name }}</td>
+        <td>{{ stu.email or '' }}</td>
+        <td>{{ stu.letter or '' }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('remove_student', course_id=section.course_id, section_number=section.section_number) }}" class="inline" onsubmit="return confirm('Remove this student from the section?');">
+                <input type="hidden" name="student_id" value="{{ stu.student_id }}">
+                <button type="submit">Remove</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <p>No students enrolled in this section.</p>
+{% endif %}
+
+</body>
+</html>

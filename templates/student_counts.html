@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <a href="/instructor"><button>return</button></a>
+    <title>Student Counts</title>
+    <style>
+        body { font-family: Arial; background:#eef2f7; padding:30px; }
+        table { width:70%; margin:auto; border-collapse:collapse; background:white; }
+        th, td { padding:12px; border:1px solid #ccc; text-align:center; }
+        th { background:#4CAF50; color:white; }
+        h2 { text-align:center; }
+        .btn-back {
+            display:block; width:120px; margin:20px auto;
+            padding:8px 12px; background:#444; color:white;
+            border-radius:6px; text-align:center;
+            text-decoration:none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Student Counts by Department</h2>
+
+<table>
+    <tr>
+        <th>Department</th>
+        <th>Current Students</th>
+        <th>Past Students</th>
+        <th>Total Students</th>
+    </tr>
+
+    {% for r in rows %}
+    <tr>
+        <td>{{ r.d_name }}</td>
+        <td>{{ r.current }}</td>
+        <td>{{ r.past }}</td>
+        <td>{{ r.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html>

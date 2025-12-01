@@ -11,7 +11,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',         
     'password': '',        
-    'database': 'euka'
+    'database': 'project'
 }
 
 
@@ -1279,8 +1279,8 @@ def add_section():
     if request.method == 'POST':
         section_number = request.form['section_number'].strip()
         course_id = request.form['course_id'].strip()
-        professor_id = request.form['professor_id'].strip()
         semester = request.form['semester'].strip()
+        year = request.form['year'].strip()
         b_name = request.form['b_name'].strip()
         room_number = request.form['room_number'].strip()
         capacity = request.form.get('capacity') or None
@@ -1288,6 +1288,10 @@ def add_section():
         valid_semesters = ['Fall', 'Spring', 'Summer', 'Winter']
         if semester not in valid_semesters:
             flash("Invalid semester. Choose Fall, Spring, Summer, or Winter.")
+            return redirect(url_for('add_section'))
+
+        if not year.isdigit() or not (1701 < int(year) < 2100):
+            flash("Invalid year. Must be between 1702 and 2099.")
             return redirect(url_for('add_section'))
 
         try:
@@ -1299,21 +1303,22 @@ def add_section():
                 flash("Invalid course_id.")
                 return redirect(url_for('add_section'))
 
-            cursor.execute("SELECT professor_id FROM professor WHERE professor_id = %s", (professor_id,))
+            cursor.execute("SELECT * FROM classroom WHERE b_name = %s AND room_number = %s", (b_name, room_number))
             if not cursor.fetchone():
-                flash("Invalid professor_id.")
+                flash("Invalid classroom (building + room number).")
                 return redirect(url_for('add_section'))
 
-            cursor.execute("SELECT b_name FROM classroom WHERE b_name = %s AND room_number = %s", (b_name, room_number))
-            if not cursor.fetchone():
-                flash("Invalid classroom (building name + room number).")
+            cursor.execute("SELECT section_number FROM section WHERE section_number = %s", (section_number,))
+            if cursor.fetchone():
+                flash("Section number already exists. Please choose a unique section number.")
                 return redirect(url_for('add_section'))
 
             cursor.execute("""
                 INSERT INTO section
-                (section_number, course_id, professor_id, semester, b_name, room_number, capacity)
-                VALUES (%s,%s,%s,%s,%s,%s,%s)
-            """, (section_number, course_id, professor_id, semester, b_name, room_number, capacity))
+                    (section_number, course_id, semester, year, b_name, room_number, capacity)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (section_number, course_id, semester, year, b_name, room_number, capacity))
+
             connection.commit()
             flash("Section added successfully!")
             return redirect(url_for('manage_sections'))
@@ -1327,6 +1332,7 @@ def add_section():
             connection.close()
 
     return render_template('add_section.html')
+
 
 
 @app.route('/admin/sections/update/<course_id>/<section_number>', methods=['GET', 'POST'])
@@ -1476,7 +1482,6 @@ def admin_profile_update():
 
 @app.route('/admin/assignments')
 def manage_assignments():
-
     if session.get('role') != 'admin':
         flash("Unauthorized access.")
         return redirect(url_for('login'))
@@ -1484,11 +1489,11 @@ def manage_assignments():
     dept = request.args.get('dept', '').strip()
 
     try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True, buffered=True)
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
 
         if dept:
-            cursor.execute("""
+            cur.execute("""
                 SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
                        s.room_number, s.capacity, c.department_id, c.c_name
                 FROM section s
@@ -1497,7 +1502,7 @@ def manage_assignments():
                 ORDER BY s.course_id, s.section_number
             """, (dept,))
         else:
-            cursor.execute("""
+            cur.execute("""
                 SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
                        s.room_number, s.capacity, c.department_id, c.c_name
                 FROM section s
@@ -1505,15 +1510,14 @@ def manage_assignments():
                 WHERE s.professor_id IS NULL
                 ORDER BY s.course_id, s.section_number
             """)
+        sections = cur.fetchall()
 
-        sections = cursor.fetchall()
-
-        cursor.execute("SELECT department_id, d_name FROM department ORDER BY d_name")
-        departments = cursor.fetchall()
+        cur.execute("SELECT department_id, d_name FROM department ORDER BY d_name")
+        departments = cur.fetchall()
 
     finally:
-        cursor.close()
-        connection.close()
+        cur.close()
+        conn.close()
 
     return render_template(
         'manage_assignments.html',
@@ -1523,102 +1527,109 @@ def manage_assignments():
     )
 
 
-@app.route('/admin/assignments/assign/<section_number>', methods=['GET', 'POST'])
-def assign_section(section_number):
-
+@app.route('/admin/assignments/assign/<course_id>/<section_number>', methods=['GET', 'POST'])
+def assign_section(course_id, section_number):
     if session.get('role') != 'admin':
         flash("Unauthorized access.")
         return redirect(url_for('login'))
 
     try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True, buffered=True)
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
 
-        cursor.execute("""
+        cur.execute("""
             SELECT s.*, c.department_id, c.c_name
             FROM section s
             LEFT JOIN course c ON s.course_id = c.course_id
-            WHERE s.section_number = %s
-        """, (section_number,))
-        section = cursor.fetchone()
+            WHERE s.course_id = %s AND s.section_number = %s
+        """, (course_id, section_number))
+        section = cur.fetchone()
 
         if not section:
             flash("Section not found.")
             return redirect(url_for('manage_assignments'))
 
-        dept_id = section.get("department_id")
+        dept_id = section.get('department_id')
 
         professors = []
         if dept_id:
-            cursor.execute("""
+            cur.execute("""
                 SELECT professor_id, p_name
                 FROM professor
                 WHERE dept_id = %s
                 ORDER BY p_name
             """, (dept_id,))
-            professors = cursor.fetchall()
+            professors = cur.fetchall()
 
         if request.method == 'POST':
             action = request.form.get('action')
 
             if action == 'remove':
-                cursor.execute("""
+
+                cur.execute("""
                     UPDATE section
                     SET professor_id = NULL
-                    WHERE section_number = %s
-                """, (section_number,))
-                connection.commit()
+                    WHERE course_id = %s AND section_number = %s
+                """, (course_id, section_number))
+                cur.execute("""
+                    DELETE FROM teaches
+                    WHERE course_ID = %s AND section_number = %s
+                """, (course_id, section_number))
+                conn.commit()
                 flash("Professor unassigned from section.")
                 return redirect(url_for('manage_assignments'))
 
             prof_id = request.form.get('professor_id', '').strip()
             if not prof_id:
                 flash("Please choose a professor.")
-                return redirect(url_for('assign_section', section_number=section_number))
+                return redirect(url_for('assign_section', course_id=course_id, section_number=section_number))
 
-            cursor.execute("SELECT dept_id FROM professor WHERE professor_id = %s", (prof_id,))
-            prof_row = cursor.fetchone()
-
+            cur.execute("SELECT dept_id FROM professor WHERE professor_id = %s", (prof_id,))
+            prof_row = cur.fetchone()
             if not prof_row:
                 flash("Selected professor does not exist.")
-                return redirect(url_for('assign_section', section_number=section_number))
+                return redirect(url_for('assign_section', course_id=course_id, section_number=section_number))
 
             if dept_id and prof_row['dept_id'] != dept_id:
                 flash("Selected professor is not in the same department as the course.")
-                return redirect(url_for('assign_section', section_number=section_number))
+                return redirect(url_for('assign_section', course_id=course_id, section_number=section_number))
 
-            cursor.execute("""
+            cur.execute("""
                 UPDATE section
                 SET professor_id = %s
-                WHERE section_number = %s
-            """, (prof_id, section_number))
-            connection.commit()
+                WHERE course_id = %s AND section_number = %s
+            """, (prof_id, course_id, section_number))
 
+            cur.execute("""
+                DELETE FROM teaches
+                WHERE course_ID = %s AND section_number = %s
+            """, (course_id, section_number))
+
+            cur.execute("""
+                INSERT INTO teaches (professor_id, section_number, course_ID)
+                VALUES (%s, %s, %s)
+            """, (prof_id, section_number, course_id))
+
+            conn.commit()
             flash("Professor assigned/updated successfully.")
             return redirect(url_for('manage_assignments'))
 
     finally:
-        cursor.close()
-        connection.close()
+        cur.close()
+        conn.close()
 
-    return render_template(
-        'assign_section.html',
-        section=section,
-        professors=professors
-    )
+    return render_template('assign_section.html', section=section, professors=professors)
 
 @app.route('/admin/assignments/assigned')
 def assigned_sections():
-
     if session.get('role') != 'admin':
         flash("Unauthorized access.")
         return redirect(url_for('login'))
 
     try:
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True, buffered=True)
-
-        cursor.execute("""
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
             SELECT s.section_number, s.course_id, s.semester, s.year, s.b_name,
                    s.room_number, s.capacity, s.professor_id,
                    p.p_name AS prof_name, c.c_name, c.department_id
@@ -1628,14 +1639,462 @@ def assigned_sections():
             WHERE s.professor_id IS NOT NULL
             ORDER BY s.course_id, s.section_number
         """)
+        rows = cur.fetchall()
+    finally:
+        cur.close()
+        conn.close()
 
+    return render_template('assigned_sections.html', sections=rows)
+
+
+@app.route('/instructor/avg_grades')
+def avg_grades():
+    if session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                d.department_id,
+                d.d_name,
+                AVG(
+                    CASE t.letter
+                        WHEN 'A' THEN 4
+                        WHEN 'B' THEN 3
+                        WHEN 'C' THEN 2
+                        WHEN 'D' THEN 1
+                        WHEN 'F' THEN 0
+                    END
+                ) AS avg_grade
+            FROM department d
+            JOIN student s ON s.dept_id = d.department_id
+            JOIN takes t ON t.student_id = s.student_id
+            GROUP BY d.department_id, d.d_name
+            ORDER BY d.d_name
+        """)
         rows = cursor.fetchall()
 
     finally:
         cursor.close()
         connection.close()
 
-    return render_template('assigned_sections.html', sections=rows)
+    return render_template("avg_grades.html", rows=rows)
+
+
+@app.route('/instructor/class_avg', methods=['GET', 'POST'])
+def class_avg():
+
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("SELECT course_id, c_name FROM course ORDER BY c_name")
+    courses = cursor.fetchall()
+
+    result = None
+    selected = None
+
+    if request.method == "POST":
+        course_id = request.form["course_id"]
+        start_sem = request.form["start_sem"]
+        start_year = request.form["start_year"]
+        end_sem = request.form["end_sem"]
+        end_year = request.form["end_year"]
+
+        selected = {
+            "course_id": course_id,
+            "start_sem": start_sem,
+            "start_year": start_year,
+            "end_sem": end_sem,
+            "end_year": end_year
+        }
+
+        query = """
+        SELECT 
+            AVG(
+                CASE 
+                    WHEN t.letter = 'A' THEN 4
+                    WHEN t.letter = 'B' THEN 3
+                    WHEN t.letter = 'C' THEN 2
+                    WHEN t.letter = 'D' THEN 1
+                    WHEN t.letter = 'F' THEN 0
+                END
+            ) AS avg_grade
+        FROM takes t
+        JOIN section s ON t.section_number = s.section_number
+        WHERE s.course_id = %s
+          AND (
+                (s.year > %s AND s.year < %s)
+                OR (s.year = %s AND 
+                    CASE s.semester 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                    >= 
+                    CASE %s 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                )
+                OR (s.year = %s AND 
+                    CASE s.semester 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                    <= 
+                    CASE %s 
+                        WHEN 'Spring' THEN 1
+                        WHEN 'Summer' THEN 2
+                        WHEN 'Fall' THEN 3
+                        WHEN 'Winter' THEN 4
+                    END
+                )
+              )
+        """
+
+        cursor.execute(query, (
+            course_id,
+            start_year, end_year,
+            start_year, start_sem,
+            end_year, end_sem
+        ))
+
+        row = cursor.fetchone()
+        result = row["avg_grade"]
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        "class_avg.html",
+        courses=courses,
+        result=result,
+        selected=selected
+    )
+
+
+@app.route('/instructor/class_comparison', methods=['GET', 'POST'])
+def class_comparison():
+
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    best = None
+    worst = None
+    classes = []
+    selected = None
+
+    if request.method == "POST":
+        sem = request.form["semester"]
+        year = request.form["year"]
+        selected = {"semester": sem, "year": year}
+
+        grade_map = {'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0}
+
+        query = """
+            SELECT c.course_id, c.c_name, t.letter
+            FROM course c
+            JOIN section s ON c.course_id = s.course_id
+            JOIN takes t ON t.section_number = s.section_number
+            WHERE s.semester = %s AND s.year = %s
+        """
+
+        cursor.execute(query, (sem, year))
+        rows = cursor.fetchall()
+
+        grade_data = {}
+
+        for r in rows:
+            val = grade_map.get(r['letter'])
+            if val is None:
+                continue
+
+            cid = r['course_id']
+            if cid not in grade_data:
+                grade_data[cid] = {
+                    "name": r['c_name'],
+                    "grades": []
+                }
+
+            grade_data[cid]["grades"].append(val)
+
+        for course_id, info in grade_data.items():
+            avg = sum(info["grades"]) / len(info["grades"])
+            classes.append({
+                "course_id": course_id,
+                "name": info["name"],
+                "avg": avg
+            })
+
+        if classes:
+            best = max(classes, key=lambda x: x['avg'])
+            worst = min(classes, key=lambda x: x['avg'])
+
+    cursor.close()
+    connection.close()
+
+    return render_template(
+        "class_comparison.html",
+        best=best,
+        worst=worst,
+        selected=selected
+    )
+
+
+@app.route('/instructor/student_counts')
+def student_counts():
+    if session.get('role') not in ['admin', 'instructor']:
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    connection = mysql.connector.connect(**db_config)
+    cursor = connection.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT d.department_id, d.d_name,
+               COUNT(s.student_id) AS current_students
+        FROM department d
+        LEFT JOIN student s ON s.dept_id = d.department_id
+        GROUP BY d.department_id, d.d_name
+        ORDER BY d.d_name
+    """)
+    current_rows = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT d.department_id, d.d_name,
+               COUNT(DISTINCT t.student_id) AS past_students
+        FROM department d
+        LEFT JOIN takes t ON TRUE
+        LEFT JOIN student s ON s.student_id = t.student_id
+        WHERE s.student_id IS NULL
+        GROUP BY d.department_id, d.d_name
+        ORDER BY d.d_name
+    """)
+    past_rows = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    result = []
+    past_map = {row['department_id']: row['past_students'] for row in past_rows}
+
+    for row in current_rows:
+        dept_id = row['department_id']
+        current = row['current_students']
+        past = past_map.get(dept_id, 0)
+        total = current + past
+
+        result.append({
+            "department_id": dept_id,
+            "d_name": row['d_name'],
+            "current": current,
+            "past": past,
+            "total": total
+        })
+
+    return render_template("student_counts.html", rows=result)
+
+
+# -------------------------------
+# Instructor: view semesters
+# -------------------------------
+@app.route('/instructor/sections')
+def instructor_sections():
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        flash("Please log in as instructor.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
+
+        # distinct semesters/years where this professor has sections via teaches
+        cur.execute("""
+            SELECT DISTINCT s.semester, s.year
+            FROM section s
+            JOIN teaches t
+              ON s.section_number = t.section_number
+             AND s.course_id = t.course_id
+            WHERE t.professor_id = %s
+            ORDER BY s.year DESC, FIELD(s.semester, 'Winter','Fall','Summer','Spring')
+        """, (professor_id,))
+        semesters = cur.fetchall()
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return render_template('instructor_sections.html', semesters=semesters)
+
+
+# -------------------------------
+# Instructor: view all sections in semester/year
+# -------------------------------
+@app.route('/instructor/sections/<semester>/<int:year>')
+def instructor_sections_by_semester(semester, year):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        flash("Please log in as instructor.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
+
+        # Get sections for this prof/semester/year — join via teaches to ensure ownership
+        cur.execute("""
+            SELECT s.section_number, s.course_id, c.c_name,
+                   s.semester, s.year, s.days, s.time, s.b_name, s.room_number, s.capacity
+            FROM section s
+            JOIN teaches t
+              ON s.section_number = t.section_number
+             AND s.course_id = t.course_id
+            JOIN course c ON s.course_id = c.course_id
+            WHERE t.professor_id = %s
+              AND s.semester = %s
+              AND s.year = %s
+            ORDER BY s.course_id, s.section_number
+        """, (professor_id, semester, year))
+
+        sections = cur.fetchall()
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return render_template(
+        'instructor_sections_by_semester.html',
+        sections=sections,
+        semester=semester,
+        year=year
+    )
+
+
+# -------------------------------
+# Instructor: view roster for a specific course_id + section_number
+# -------------------------------
+@app.route('/instructor/sections/<course_id>/<section_number>/roster')
+def section_roster(course_id, section_number):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        flash("Please log in as instructor.")
+        return redirect(url_for('login'))
+
+    professor_id = session['user_id']
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
+
+        # Verify professor actually teaches this specific course+section
+        cur.execute("""
+            SELECT 1
+            FROM teaches
+            WHERE professor_id = %s
+              AND course_id = %s
+              AND section_number = %s
+        """, (professor_id, course_id, section_number))
+        if not cur.fetchone():
+            cur.close()
+            conn.close()
+            flash("You do not teach that section.")
+            return redirect(url_for('instructor_sections'))
+
+        # Get section header info
+        cur.execute("""
+            SELECT s.section_number, s.course_id, c.c_name, s.semester, s.year
+            FROM section s
+            JOIN course c ON s.course_id = c.course_id
+            WHERE s.course_id = %s AND s.section_number = %s
+        """, (course_id, section_number))
+        section = cur.fetchone()
+
+        # Get roster (note: we include course_id in WHERE to avoid collisions)
+        cur.execute("""
+            SELECT t.student_id, st.s_name, st.email, t.letter
+            FROM takes t
+            JOIN student st ON t.student_id = st.student_id
+            WHERE t.course_id = %s AND t.section_number = %s
+            ORDER BY st.s_name
+        """, (course_id, section_number))
+        students = cur.fetchall()
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return render_template(
+        'section_roster.html',
+        section=section,
+        students=students
+    )
+
+
+# -------------------------------
+# Instructor: remove a student from a specific course_id + section_number
+# -------------------------------
+@app.route('/instructor/sections/<course_id>/<section_number>/remove_student', methods=['POST'])
+def remove_student(course_id, section_number):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        flash("Please log in as instructor.")
+        return redirect(url_for('login'))
+
+    student_id = request.form.get('student_id', '').strip()
+    if not student_id:
+        flash("No student selected.")
+        return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
+
+    professor_id = session['user_id']
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cur = conn.cursor(dictionary=True)
+
+        # Verify professor teaches this course+section (safety)
+        cur.execute("""
+            SELECT 1
+            FROM teaches
+            WHERE professor_id = %s AND course_id = %s AND section_number = %s
+        """, (professor_id, course_id, section_number))
+        if not cur.fetchone():
+            flash("Unauthorized.")
+            cur.close()
+            conn.close()
+            return redirect(url_for('instructor_sections'))
+
+        # Delete from takes using student_id + section_number + course_id to avoid collisions
+        cur.execute("""
+            DELETE FROM takes
+            WHERE student_id = %s AND section_number = %s AND course_id = %s
+        """, (student_id, section_number, course_id))
+        conn.commit()
+
+        flash("Student removed from section.")
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
+
 
 
 @app.route("/instructor/grade/<section_number>")

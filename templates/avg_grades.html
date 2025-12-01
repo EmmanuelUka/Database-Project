@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<a href="/instructor"><button>return</button></a>
+<h2>Average Grades by Department</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Department</th>
+            <th>Average Grade</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row.d_name }} ({{ row.department_id }})</td>
+            <td>{{ "%.2f"|format(row.avg_grade) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</html>
