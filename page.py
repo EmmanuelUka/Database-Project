@@ -198,7 +198,7 @@ def class_list():
 
         query = """
             SELECT t.section_number, t.course_id, 
-                   s.semester, s.year, s.days, s.time
+                   s.semester, s.year, s.days, s.time, s.capacity, s.b_name, s.room_number 
             FROM takes t
             JOIN section s ON t.section_number = s.section_number
             WHERE t.student_id = %s

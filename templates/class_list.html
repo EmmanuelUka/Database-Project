@@ -25,7 +25,12 @@
         <th>Year</th>
         <th>Days</th>
         <th>Time</th>
+        <th>Capacity</th>
+        <th>Building Name</th>
+        <th>Room Number</th>
+        <th>Status</th>
         <th>Action</th>
+
     </tr>
 
     {% for s in registered_sections %}
@@ -36,6 +41,11 @@
         <td>{{ s.year }}</td>
         <td>{{ s.days }}</td>
         <td>{{ s.time }}</td>
+        <td>{{ s.capacity }}</td>
+        <td>{{ s.b_name }}</td>
+        <td>{{ s.room_number }}</td>
+
+
         <td>{{ s.status }}</td>
 
 
