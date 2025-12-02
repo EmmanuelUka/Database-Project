@@ -6,8 +6,9 @@ body {
 
 .btn-primary {
   background-color: rgb(28, 30, 30);
-  position: absolute;
-  top: 500px;
+  position: fixed;
+  bottom: 20px;   
+  right: 20px;
 }
 
 .filter-btn{
@@ -75,4 +76,7 @@ tr:hover {
   border-radius: 5px;
 }
 
-
+.avgs {
+            background:#28a745; color:white; padding:10px 15px;
+            border:none; border-radius:5px; cursor:pointer;
+        }   

@@ -26,16 +26,17 @@
         <ul class="nav navbar-nav navbar-right">
             <li>
                 <a href="/student/profile" >
-                    <span class="glyphicon glyphicon-user"></span> Modify Personal Info</a></li>
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
   </div>
 </nav>
     
-<h1>Your Registered Classes
-    <br>
-    Register and drop classes
+<h1>
+    Manage Your classes, {{ session.username }}
 </h1>
 
 <h2>Filter by Semester</h2>
+
+
 
 <div>
 <form action="/student/register/class_list" method="POST" class="form-inline mb-3">
@@ -81,11 +82,15 @@
 
         <td>{{ s.status }}</td>
 
+        {% set can_drop = (s.year > 2025) or (s.year == 2025 and s.semester == 'Fall') %}
+
 
         <td>
-            <form action="/student/register/drop_class" method="POST">
+            <form method="POST" action="{{ url_for('drop_class') }}">
                 <input type="hidden" name="section_id" value="{{ s.section_number }}">
-                <button type="submit" class="btn btn-danger">Drop</button>
+                <button class="btn btn-danger"
+                    {% if not can_drop %}disabled title="Cannot drop classes before Fall 2025"{% endif %}> Drop
+                </button>
             </form>
         </td>
     </tr>

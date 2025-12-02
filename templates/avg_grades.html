@@ -51,13 +51,14 @@
         {% for row in rows %}
         <tr>
             <td>{{ row.d_name }} ({{ row.department_id }})</td>
-            <td>{{ "%.2f"|format(row.avg_grade) }}</td>
+            <td>{{ "%.2f"|format(row.avg_grade if row.avg_grade is not none else 0) }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href="/instructor"><button>return</button></a>
-
+<form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
 </body>
 </html>

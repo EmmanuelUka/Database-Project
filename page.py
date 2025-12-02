@@ -191,8 +191,15 @@ def class_list():
         cursor = connection.cursor(dictionary=True)
 
         query = """
-            SELECT t.section_number, t.course_id, 
-                   s.semester, s.year, s.days, s.time, s.capacity, s.b_name, s.room_number 
+            SELECT t.section_number,
+                   s.course_id,
+                   s.semester,
+                   s.year,
+                   s.days,
+                   s.time,
+                   s.capacity,
+                   s.b_name,
+                   s.room_number
             FROM takes t
             JOIN section s ON t.section_number = s.section_number
             WHERE t.student_id = %s
@@ -205,7 +212,8 @@ def class_list():
 
         cursor.execute(query, params)
         registered_sections = cursor.fetchall()
-        
+
+        # Add status (your custom logic)
         for row in registered_sections:
             row["status"] = get_status(row)
 
@@ -218,6 +226,7 @@ def class_list():
         registered_sections=registered_sections,
         selected_semester=selected_semester
     )
+
 
 
 @app.route("/student/register/drop_class", methods=["POST"])

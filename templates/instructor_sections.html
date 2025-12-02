@@ -45,7 +45,6 @@
 
 <h1>Your Semesters</h1>
 
-<a href="/instructor" class="btn btn-success">Return</a>
 
 <br><br>
 
@@ -71,6 +70,10 @@
 {% else %}
     <p>No sections found for you.</p>
 {% endif %}
+
+<form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
 
 </body>
 </html>

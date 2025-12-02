@@ -86,8 +86,9 @@
 </form>
 </div>
 <br>
-<a href="/instructor"><button>Back</button></a>
-
+<form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
 </body>
 </html>
 

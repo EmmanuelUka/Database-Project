@@ -41,6 +41,54 @@
 
 
     <h1>Welcome, {{ username }} (Administrator)</h1>
+    <body class="bg-light">
+<div class="container mt-5">
+  <!-- Admin Dashboard Card -->
+  <div class="card shadow">
+    <div class="card-header bg-success text-white">
+      Admin Dashboard – Key Information
+    </div>
+    <div class="card-body">
+      
+      <!-- Staff Reminders -->
+      <h5 class="card-title">👩‍💼 Staff Reminders</h5>
+      <ul>
+        <li>Submit monthly attendance reports by the 5th of each month.</li>
+        <li>Ensure all grade entries are finalized before exam week.</li>
+        <li>Schedule teacher evaluations before the end of the semester.</li>
+      </ul>
+      <hr>
+
+      <!-- Facility Information -->
+      <h5 class="card-title">🏫 Facility Information</h5>
+      <p>Office Hours:</p>
+      <ul>
+        <li>Mon–Fri: 7:30 AM – 6:00 PM</li>
+        <li>Sat: 9:00 AM – 1:00 PM</li>
+      </ul>
+      <p>Maintenance requests can be submitted via the Facilities Portal.</p>
+      <hr>
+
+      <!-- Upcoming Deadlines -->
+      <h5 class="card-title">📅 Upcoming Deadlines</h5>
+      <ul>
+        <li>Budget Proposal Submission: <strong>Dec 8, 2025</strong></li>
+        <li>Teacher Training Workshop: <strong>Dec 9, 2025</strong></li>
+        <li>Final Exam Coordination Meeting: <strong>Dec 10, 2025</strong></li>
+      </ul>
+      <hr>
+
+      <!-- Notifications -->
+      <h5 class="card-title">🔔 Notifications</h5>
+      <ul>
+        <li>New student enrollment requests pending approval.</li>
+        <li>Library system update scheduled for Dec 7, 2025.</li>
+        <li>Annual fire drill planned for Dec 13, 2025.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
 
 
     <form action="{{ url_for('logout') }}">

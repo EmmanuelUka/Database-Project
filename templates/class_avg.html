@@ -20,11 +20,8 @@
             width:100%; padding:8px; margin:10px 0;
             border-radius:5px; border:1px solid #bbb;
         }
-        button {
-            padding:10px 15px; width:100%;
-            background:#4CAF50; color:white;
-            border:none; border-radius:6px; font-size:16px;
-        }
+    
+        
         .result {
             margin-top:20px; padding:15px; background:#dff0d8;
             border-left:5px solid #3c763d; border-radius:4px;
@@ -57,7 +54,6 @@
 </nav>
 
 
-<p><a href="/instructor">return</a></p>
 <div class="box">
     <h2>Average Grade Across Semesters</h2>
 
@@ -103,7 +99,7 @@
         <input type="number" name="end_year" required
                value="{{ selected.end_year if selected }}">
 
-        <button type="submit">Calculate Average</button>
+        <button type="submit" class ="avgs">Calculate Average</button>
     </form>
 
     {% if result is not none %}
@@ -112,6 +108,10 @@
         </div>
     {% endif %}
 </div>
+
+<form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
 
 </body>
 </html>

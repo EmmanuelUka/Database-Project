@@ -25,16 +25,51 @@
         <ul class="nav navbar-nav navbar-right">
             <li>
                 <a href="/student/profile" >
-                    <span class="glyphicon glyphicon-user"></span> Modify Personal Info</a></li>
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
   </div>
 </nav>
 <h1 class = "text-center">Welcome, {{ username }} </h1>
 
+<body class="bg-light">
+<div class="container mt-5">
+  <!-- Tips & Info Card -->
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      Student Tips & Information
+    </div>
+    <div class="card-body">
+      
+      <!-- Study Tips -->
+      <h5 class="card-title">📚 Study Tips</h5>
+      <ul>
+        <li>Use the Pomodoro technique: 25 minutes study, 5 minutes break.</li>
+        <li>Summarize notes in your own words to improve retention.</li>
+        <li>Form small study groups for collaborative learning.</li>
+      </ul>
+      <hr>
 
-<h1>Enroll in a section <a href="/student/register">Register here</a></h1>
+      <!-- Library Info -->
+      <h5 class="card-title">🏛️ Library Information</h5>
+      <p>Main Library Hours:</p>
+      <ul>
+        <li>Mon–Fri: 8:00 AM – 10:00 PM</li>
+        <li>Sat–Sun: 10:00 AM – 6:00 PM</li>
+      </ul>
+      <p>Quiet study zones available on the 2nd floor.</p>
+      <hr>
 
-<h1>Check your final grades here <a href = "/student/register/final_grade"> here </a></h1>
-
+      <!-- Finals Calendar -->
+      <h5 class="card-title">📅 Finals Calendar</h5>
+      <p>Final Exams Week: <strong>December 10 – December 15, 2025</strong></p>
+      <ul>
+        <li>CS101: Dec 11, 9:00 AM</li>
+        <li>MATH202: Dec 12, 1:00 PM</li>
+        <li>ENG150: Dec 14, 10:00 AM</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
 
 <div>
     <form action="{{ url_for('logout') }}">

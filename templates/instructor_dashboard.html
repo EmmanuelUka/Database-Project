@@ -43,9 +43,58 @@
 
     <h1>Welcome, {{ username }} (Instructor)</h1>
 
+    <body class="bg-light">
+<div class="container mt-5">
+  <!-- Instructor Dashboard Card -->
+  <div class="card shadow">
+    <div class="card-header bg-info text-white">
+      Instructor Dashboard – Teaching & Resources
+    </div>
+    <div class="card-body">
+      
+      <!-- Teaching Reminders -->
+      <h5 class="card-title">📖 Teaching Reminders</h5>
+      <ul>
+        <li>Upload lecture slides and assignments at least 24 hours before class.</li>
+        <li>Grade submissions within one week of the due date.</li>
+        <li>Provide mid-semester feedback to students for improvement.</li>
+      </ul>
+      <hr>
+
+      <!-- Classroom Information -->
+      <h5 class="card-title">🏫 Classroom Information</h5>
+      <p>Office Hours:</p>
+      <ul>
+        <li>Mon–Wed: 2:00 PM – 4:00 PM</li>
+        <li>Fri: 10:00 AM – 12:00 PM</li>
+      </ul>
+      <p>Classroom technology support available via IT Helpdesk.</p>
+      <hr>
+
+      <!-- Upcoming Academic Dates -->
+      <h5 class="card-title">📅 Upcoming Academic Dates</h5>
+      <ul>
+        <li>Assignment 3 Due: <strong>Dec 9, 2025</strong></li>
+        <li>Project Presentations: <strong>Dec 13, 2025</strong></li>
+        <li>Final Exams Week: <strong>Dec 10 – Dec 15, 2025</strong></li>
+      </ul>
+      <hr>
+
+      <!-- Professional Development -->
+      <h5 class="card-title">🎓 Professional Development</h5>
+      <ul>
+        <li>Faculty Workshop on Inclusive Teaching: Dec 7, 2025</li>
+        <li>Research Grant Application Deadline: Dec 20, 2025</li>
+        <li>Annual Teaching Excellence Awards Nominations: Open until Jan 5, 2026</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+
 
     <form action="{{ url_for('logout') }}">
-        <button type="submit">Logout</button>
-    </form>
+        <button type="submit" class="btn btn-primary">logout</button>
+</form>
 </body>
 </html>

@@ -112,5 +112,9 @@
         <p>No eligible students in your department.</p>
     {% endif %}
 
+    <form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
+
 </body>
 </html>

@@ -20,11 +20,7 @@
             width:100%; padding:8px; margin:10px 0;
             border-radius:5px; border:1px solid #bbb;
         }
-        button {
-            padding:10px 15px; width:100%;
-            background:#4CAF50; color:white;
-            border:none; border-radius:6px; font-size:16px;
-        }
+        
         .result-box {
             margin-top:20px; padding:15px; background:#e6f2ff;
             border-left:5px solid #428bca; border-radius:4px;
@@ -63,7 +59,6 @@
 
 <div class="box">
 
-    <a href="/instructor" class="return-btn">Return</a>
     <h2>Best & Worst Classes for a Semester</h2>
 
     <form method="POST">
@@ -83,7 +78,7 @@
         <input type="number" name="year" required
             value="{{ selected.year if selected }}">
 
-        <button type="submit">Show Performance</button>
+        <button type="submit" class="avgs">Show Performance</button>
     </form>
 
     {% if best %}
@@ -101,6 +96,8 @@
     {% endif %}
 
 </div>
-
+<form action="{{ url_for('instructor_dashboard') }}">
+        <button type="submit" class="btn btn-primary">return</button>
+</form>
 </body>
 </html>
