@@ -2302,5 +2302,107 @@ def remove_prerequisite():
     return redirect(url_for('manage_prerequisites', course_id=course_id))
 
 
+@app.route('/instructor/update_profile', methods=['GET', 'POST'])
+def update_instructor_profile():
+    if session.get('role') != 'instructor':
+        flash("Unauthorized access.")
+        return redirect(url_for('login'))
+
+    try:
+        connection = mysql.connector.connect(**db_config)
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT u.user_id, u.username, u.password,
+                   p.p_name, p.address_houseNumber, p.address_street,
+                   p.address_city, p.address_state, p.address_zip
+            FROM users u
+            JOIN professor p ON u.user_id = p.professor_id
+            WHERE u.user_id = %s
+        """, (session['user_id'],))
+        
+        user = cursor.fetchone()
+
+        if not user:
+            flash("User not found.")
+            return redirect(url_for('login'))
+
+       
+        if request.method == 'POST':
+            old_password = request.form.get('old_password', '')
+            new_username = request.form.get('username', '').strip()
+            new_password = request.form.get('password', '').strip()
+
+            # Validations
+            if not new_username:
+                flash("Username cannot be empty.")
+                return redirect(url_for('update_instructor_profile'))
+
+            if not old_password:
+                flash("Please enter your old password to confirm changes.")
+                return redirect(url_for('update_instructor_profile'))
+
+            if not bcrypt.check_password_hash(user['password'], old_password):
+                flash("Old password is incorrect.")
+                return redirect(url_for('update_instructor_profile'))
+
+            if not new_password:
+                flash("New password cannot be empty.")
+                return redirect(url_for('update_instructor_profile'))
+
+            # Check if username taken
+            if new_username != user['username']:
+                cursor.execute("SELECT user_id FROM users WHERE username = %s", (new_username,))
+                if cursor.fetchone():
+                    flash("Username already taken. Choose another.")
+                    return redirect(url_for('update_instructor_profile'))
+
+            # Update USERS table
+            hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+            cursor.execute("""
+                UPDATE users
+                SET username = %s, password = %s
+                WHERE user_id = %s
+            """, (new_username, hashed_password, user['user_id']))
+
+            # Update PROFESSOR table
+            cursor.execute("""
+                UPDATE professor
+                SET p_name = %s,
+                    address_houseNumber = %s,
+                    address_street = %s,
+                    address_city = %s,
+                    address_state = %s,
+                    address_zip = %s
+                WHERE professor_id = %s
+            """, (
+                request.form.get('p_name'),
+                request.form.get('address_houseNumber'),
+                request.form.get('address_street'),
+                request.form.get('address_city'),
+                request.form.get('address_state'),
+                request.form.get('address_zip') or None,
+                user['user_id']
+            ))
+
+            connection.commit()
+            flash("Profile updated successfully!")
+            return redirect(url_for('instructor_dashboard'))
+
+    except mysql.connector.Error as err:
+        app.logger.error("DB error: %s", err)
+        flash("Database error: " + str(err))
+        return redirect(url_for('update_instructor_profile'))
+
+    finally:
+        try:
+            cursor.close()
+            connection.close()
+        except:
+            pass
+
+    return render_template('update_instructor_profile.html', user=user)
+
+
 if __name__ == '__main__':
     app.run(debug=True)

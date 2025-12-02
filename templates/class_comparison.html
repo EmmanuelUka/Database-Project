@@ -2,8 +2,16 @@
 <html>
 <head>
     <title>Semester Performance</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+
     <style>
-        body { font-family: Arial; background:#eef2f7; padding:30px; }
+        body { font-family: Arial; background:#eef2f7; padding:0px; }
         .box {
             background:white; padding:20px; width:450px; margin:auto;
             border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.15);
@@ -29,6 +37,29 @@
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Instructor Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/instructor">Dashboard</a></li>
+            <li><a href="/instructor/advising">Advisor</a></li>
+            <li><a href="/instructor/prerequisites">Course Prerequisites</a></li>
+            <li><a href="/instructor/sections">Section</a></li>
+            <li><a href="/instructor/update_profile">Profile</a></li>
+            <li><a href="/instructor/avg_grades">Average Grades</a></li>
+            <li><a href="/instructor/class_avg">Class Average</a></li>
+            <li class="active"><a href="/instructor/class_comparison">Class Comparison</a></li>
+            <li><a href="/instructor/student_counts">Student Count</a></li>
+            
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="#" >
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
+  </div>
+</nav>
 
 <div class="box">
 

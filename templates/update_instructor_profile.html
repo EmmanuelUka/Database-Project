@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for msg in messages %}
+            <p style="color:red;">{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<html>
+<head>
+    <title>Update Profile</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+
+    
+</head>
+
+
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Instructor Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="/instructor">Dashboard</a></li>
+            <li><a href="/instructor/advising">Advisor</a></li>
+            <li><a href="/instructor/prerequisites">Course Prerequisites</a></li>
+            <li><a href="/instructor/sections">Section</a></li>
+            <li class="active"><a href="/instructor/update_profile">Profile</a></li>
+            <li><a href="/instructor/avg_grades">Average Grades</a></li>
+            <li><a href="/instructor/class_avg">Class Average</a></li>
+            <li><a href="/instructor/class_comparison">Class Comparison</a></li>
+            <li><a href="/instructor/student_counts">Student Count</a></li>
+
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="/instructor/" >
+                    <span class="glyphicon glyphicon-user"></span> Profile</a></li>
+  </div>
+</nav>
+
+
+<div class ="profile-form">
+   <form method="POST">
+
+    <label>Old Password:</label>
+    <input type="password" name="old_password" required>
+
+    <label>New Username:</label>
+    <input type="text" name="username" value="{{ user.username }}" required>
+
+    <label>New Password:</label>
+    <input type="password" name="password" required>
+
+    <hr>
+
+    <label>Full Name:</label>
+    <input type="text" name="p_name" value="{{ user.p_name }}" required>
+
+    <label>House Number:</label>
+    <input type="text" name="address_houseNumber" value="{{ user.address_houseNumber }}">
+
+    <label>Street:</label>
+    <input type="text" name="address_street" value="{{ user.address_street }}">
+
+    <label>City:</label>
+    <input type="text" name="address_city" value="{{ user.address_city }}">
+
+    <label>State:</label>
+    <input type="text" name="address_state" value="{{ user.address_state }}">
+
+    <label>Zip Code:</label>
+    <input type="text" name="address_zip" value="{{ user.address_zip }}">
+
+    <button type="submit">Update</button>
+</form>
+</div>
+<br>
+<a href="/instructor"><button>Back</button></a>
+
+</body>
+</html>
+
+
