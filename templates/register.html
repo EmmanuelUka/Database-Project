@@ -9,6 +9,26 @@
 </head>
 
 <body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Student Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            
+            <li><a href="/student">Dashboard</a></li>
+            <li class="active"><a href="/student/register">Register Classes</a></li>
+            <li><a href="/student/register/class_list">Manage Classes</a></li>
+            <li><a href="/student/register/final_grade">View Grades</a></li>
+
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="/student/profile" >
+                    <span class="glyphicon glyphicon-user"></span> Modify Personal Info</a></li>
+  </div>
+</nav>
+
     <h1>Welcome, {{ session.username }} (Student)</h1>
     <h2>Available Sections</h2>
 

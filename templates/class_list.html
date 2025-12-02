@@ -1,3 +1,35 @@
+<head>
+
+    <title>Class List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+</head>
+
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Student Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            
+            <li><a href="/student">Dashboard</a></li>
+            <li><a href="/student/register">Register Classes</a></li>
+            <li class="active"><a href="/student/register/class_list">Manage Classes</a></li>
+            <li><a href="/student/register/final_grade">View Grades</a></li>
+
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="/student/profile" >
+                    <span class="glyphicon glyphicon-user"></span> Modify Personal Info</a></li>
+  </div>
+</nav>
+    
 <h1>Your Registered Classes
     <br>
     Register and drop classes
@@ -62,3 +94,4 @@
 <br>
 
 <h1>To Register for more classes, click <a href="/student/register">here</a></h1>   
+</body>
