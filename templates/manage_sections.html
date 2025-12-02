@@ -2,8 +2,17 @@
 <html>
 <head>
     <title>Manage Sections</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student.css') }}">
+
     <style>
-        body { font-family: Arial; background:#f5f6fa; padding:30px; }
+        body { font-family: Arial; background:#f5f6fa; padding:0px; }
         table { width:100%; border-collapse:collapse; background:white; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
         th,td { border:1px solid #ccc; padding:12px; text-align:left; }
         th { background:#4CAF50; color:white; }
@@ -13,6 +22,30 @@
     </style>
 </head>
 <body>
+
+    <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand active" href="#">Administrator Portal</a>
+        </div>
+        <ul class="nav navbar-nav">
+            
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/courses">Manage Courses</a></li>
+            <li class="active"><a href="/admin/sections">Manage Sections</a></li>
+            <li><a href="/admin/classrooms">Manage Classrooms</a></li>
+            <li><a href="/admin/departments">Manage Departments</a></li>
+            <li><a href="/admin/students">Manage Students</a></li>
+            <li><a href="/admin/professors">Manage Professors</a></li>
+            <li><a href="/admin/assignments">Manage assignments</a></li>
+
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li>
+                <a href="/admin/profile/update" >
+                    <span class="glyphicon glyphicon-user"></span> Modify Personal Info</a></li>
+  </div>
+</nav>
 
 <h1>Sections</h1>
 
