@@ -41,14 +41,12 @@ def login():
             if connection:
                 connection.close()
 
-        # Authentication logic
         if user and bcrypt.check_password_hash(user['password'], password):
             session['user_id'] = user['user_id']
             session['username'] = user['username']
             session['role'] = user['role']
             flash('Login successful!')
 
-            # Routing based on role
             return redirect(url_for(f"{user['role']}_dashboard"))
             
         else:
@@ -92,22 +90,23 @@ def show_sections():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Fetch sections student hasn't registered for yet
         cursor.execute("""
             SELECT s.section_number, s.course_id, s.semester, s.year, s.days, s.time, c.c_name
             FROM section s
             JOIN course c ON s.course_id = c.course_id
-            WHERE s.section_number NOT IN (
-                SELECT section_number FROM takes WHERE student_id = %s
-            )
+            WHERE (s.year > 2025 OR (s.year = 2025 AND s.semester = 'Fall'))
+              AND s.section_number NOT IN (
+                    SELECT section_number FROM takes WHERE student_id = %s
+              )
         """, (session['user_id'],))
+
         sections = cursor.fetchall()
+
     finally:
         cursor.close()
         connection.close()
 
     return render_template("register.html", sections=sections)
-
 
 
 @app.route("/student/register/submit", methods=["POST"])
@@ -123,7 +122,6 @@ def register_submit():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Check if already registered
         cursor.execute("""
             SELECT * FROM takes
             WHERE student_id = %s AND section_number = %s
@@ -132,7 +130,6 @@ def register_submit():
             flash("Already registered in this class.")
             return redirect(url_for('show_sections'))
 
-        # Insert into takes with grade = NULL
         cursor.execute("""
             INSERT INTO takes (student_id, section_number, letter, course_ID)
             SELECT %s, section_number, NULL, course_id
@@ -153,7 +150,6 @@ def get_status(row):
     current_year = datetime.now().year
     current_month = datetime.now().month
 
-    # Convert month to semester
     if current_month in [1, 2, 3, 4, 5]:
         current_semester = "Spring"
     elif current_month in [6, 7, 8]:
@@ -164,13 +160,11 @@ def get_status(row):
     year = row["year"]
     semester = row["semester"]
 
-    # Compare year first
     if year < current_year:
         return "Completed"
     if year > current_year:
         return "Upcoming"
 
-    # Same year → compare semester order
     order = {"Spring": 1, "Summer": 2, "Fall": 3}
     if order[semester] < order[current_semester]:
         return "Completed"
@@ -205,7 +199,6 @@ def class_list():
         """
         params = [student_id]
 
-        # Add semester filter only if selected
         if selected_semester and selected_semester != "all":
             query += " AND s.semester = %s"
             params.append(selected_semester)
@@ -499,7 +492,6 @@ def update_department(department_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Get current values
         cursor.execute("SELECT * FROM department WHERE department_ID = %s", (department_id,))
         department = cursor.fetchone()
 
@@ -508,7 +500,6 @@ def update_department(department_id):
             return redirect(url_for('manage_departments'))
 
         if request.method == 'POST':
-            # Only update fields that are not blank
             new_d_name = request.form.get('d_name') or department['d_name']
             new_b_name = request.form.get('b_name') or department['b_name']
             new_budget = request.form.get('budget') or department['budget']
@@ -608,7 +599,6 @@ def update_classroom(b_name, room_number):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Fetch existing classroom info
         cursor.execute(
             "SELECT * FROM classroom WHERE b_name = %s AND room_number = %s",
             (b_name, room_number)
@@ -655,7 +645,7 @@ def search_classrooms():
 
     try:
         connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor(dictionary=True)   # ← FIXED!
+        cursor = connection.cursor(dictionary=True)  
 
         pattern = f"%{term}%"
         cursor.execute("""
@@ -795,7 +785,6 @@ def update_student(student_id):
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Fetch student
         cursor.execute("SELECT * FROM student WHERE student_id = %s", (student_id,))
         student = cursor.fetchone()
         if not student:
@@ -1103,7 +1092,6 @@ def add_course():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Validate department_id
         cursor.execute(
             "SELECT department_id FROM department WHERE department_id = %s",
             (department_id,)
@@ -1153,7 +1141,6 @@ def update_course(course_id):
         credits = request.form['credits']
         department_id = request.form['department_id']
 
-        # validate department_id
         cursor.execute(
             "SELECT department_id FROM department WHERE department_id = %s",
             (department_id,)
@@ -1914,9 +1901,7 @@ def student_counts():
     return render_template("student_counts.html", rows=result)
 
 
-# -------------------------------
-# Instructor: view semesters
-# -------------------------------
+
 @app.route('/instructor/sections')
 def instructor_sections():
     if 'user_id' not in session or session.get('role') != 'instructor':
@@ -1947,9 +1932,7 @@ def instructor_sections():
     return render_template('instructor_sections.html', semesters=semesters)
 
 
-# -------------------------------
-# Instructor: view sections inside semester
-# -------------------------------
+
 @app.route('/instructor/sections/<semester>/<int:year>')
 def instructor_sections_by_semester(semester, year):
     if 'user_id' not in session or session.get('role') != 'instructor':
@@ -1989,9 +1972,7 @@ def instructor_sections_by_semester(semester, year):
     )
 
 
-# -------------------------------
-# Instructor: Roster (NOW ALSO handles grade changes + removals)
-# -------------------------------
+
 @app.route('/instructor/sections/<course_id>/<section_number>/roster')
 def section_roster(course_id, section_number):
     if 'user_id' not in session or session.get('role') != 'instructor':
@@ -2004,7 +1985,6 @@ def section_roster(course_id, section_number):
         conn = mysql.connector.connect(**db_config)
         cur = conn.cursor(dictionary=True)
 
-        # Verify instructor teaches this class
         cur.execute("""
             SELECT 1 FROM teaches
             WHERE professor_id = %s AND course_id = %s AND section_number = %s
@@ -2014,7 +1994,6 @@ def section_roster(course_id, section_number):
             flash("You do not teach this section.")
             return redirect(url_for('instructor_sections'))
 
-        # Section info
         cur.execute("""
             SELECT s.section_number, s.course_id, c.c_name, s.semester, s.year
             FROM section s
@@ -2023,7 +2002,6 @@ def section_roster(course_id, section_number):
         """, (course_id, section_number))
         section = cur.fetchone()
 
-        # Students + grades
         cur.execute("""
             SELECT t.student_id, st.s_name, st.email, t.letter
             FROM takes t
@@ -2044,9 +2022,7 @@ def section_roster(course_id, section_number):
     )
 
 
-# -------------------------------
-# Instructor: Update/Assign Grade
-# -------------------------------
+
 @app.route('/instructor/sections/<course_id>/<section_number>/update_grade', methods=['POST'])
 def update_grade(course_id, section_number):
     if 'user_id' not in session or session.get('role') != 'instructor':
@@ -2076,9 +2052,7 @@ def update_grade(course_id, section_number):
     return redirect(url_for('section_roster', course_id=course_id, section_number=section_number))
 
 
-# -------------------------------
-# Instructor: Remove student from class
-# -------------------------------
+
 @app.route('/instructor/sections/<course_id>/<section_number>/remove_student', methods=['POST'])
 def remove_student(course_id, section_number):
     if 'user_id' not in session or session.get('role') != 'instructor':
@@ -2118,11 +2092,9 @@ def advising_dashboard():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Get professor's department
         cursor.execute("SELECT dept_id FROM professor WHERE professor_id = %s", (professor_id,))
         prof_dept = cursor.fetchone()['dept_id']
 
-        # Students this professor already advises
         cursor.execute("""
             SELECT student_id, s_name, email, dept_id
             FROM student
@@ -2130,7 +2102,6 @@ def advising_dashboard():
         """, (professor_id,))
         advisees = cursor.fetchall()
 
-        # Students from same department not advised by this professor
         cursor.execute("""
             SELECT student_id, s_name, email, dept_id
             FROM student
@@ -2162,7 +2133,6 @@ def add_advisee():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Safe to update since foreign key ensures student exists
         cursor.execute("UPDATE student SET advisor = %s WHERE student_id = %s", (professor_id, student_id))
         connection.commit()
 
@@ -2187,7 +2157,6 @@ def remove_advisee():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor()
 
-        # Extra safety: only remove if current professor is advisor
         cursor.execute("SELECT advisor FROM student WHERE student_id = %s", (student_id,))
         current_advisor = cursor.fetchone()[0]
 
@@ -2218,7 +2187,6 @@ def manage_prerequisites():
         connection = mysql.connector.connect(**db_config)
         cursor = connection.cursor(dictionary=True)
 
-        # Get all courses this professor teaches
         cursor.execute("""
             SELECT s.course_id, c.c_name
             FROM section s
@@ -2228,13 +2196,11 @@ def manage_prerequisites():
         """, (professor_id,))
         courses = cursor.fetchall()
 
-        # If a course is selected via query param, get its prerequisites
         selected_course_id = request.args.get('course_id')
         prerequisites = []
         available_courses = []
 
         if selected_course_id:
-            # Get current prerequisites
             cursor.execute("""
                 SELECT c.course_id, c.c_name
                 FROM course_prerequisite cp
@@ -2243,7 +2209,6 @@ def manage_prerequisites():
             """, (selected_course_id,))
             prerequisites = cursor.fetchall()
 
-            # Get all other courses in same department as possible prerequisites
             cursor.execute("""
                 SELECT course_id, c_name
                 FROM course
@@ -2333,7 +2298,6 @@ def update_instructor_profile():
             new_username = request.form.get('username', '').strip()
             new_password = request.form.get('password', '').strip()
 
-            # Validations
             if not new_username:
                 flash("Username cannot be empty.")
                 return redirect(url_for('update_instructor_profile'))
@@ -2350,14 +2314,12 @@ def update_instructor_profile():
                 flash("New password cannot be empty.")
                 return redirect(url_for('update_instructor_profile'))
 
-            # Check if username taken
             if new_username != user['username']:
                 cursor.execute("SELECT user_id FROM users WHERE username = %s", (new_username,))
                 if cursor.fetchone():
                     flash("Username already taken. Choose another.")
                     return redirect(url_for('update_instructor_profile'))
 
-            # Update USERS table
             hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
             cursor.execute("""
                 UPDATE users
@@ -2365,7 +2327,6 @@ def update_instructor_profile():
                 WHERE user_id = %s
             """, (new_username, hashed_password, user['user_id']))
 
-            # Update PROFESSOR table
             cursor.execute("""
                 UPDATE professor
                 SET p_name = %s,

@@ -10,6 +10,14 @@ body {
   top: 500px;
 }
 
+.filter-btn{
+  background-color: rgb(20, 80, 130);
+  color: white;
+  border: none; 
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
 .profile-glyphicon {
   position: absolute;
   top: 70px;     

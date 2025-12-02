@@ -37,6 +37,7 @@
 
 <h2>Filter by Semester</h2>
 
+<div>
 <form action="/student/register/class_list" method="POST" class="form-inline mb-3">
     <label for="semester" class="mr-2">Filter by Semester:</label>
     <select name="semester" id="semester" class="form-control mr-2">
@@ -45,9 +46,9 @@
         <option value="Spring" {% if selected_semester == "Spring" %}selected{% endif %}>Spring</option>
         <option value="Summer" {% if selected_semester == "Summer" %}selected{% endif %}>Summer</option>
     </select>
-    <button type="submit" class="btn btn-primary">Filter</button>
+    <button type="submit" class="filter-btn">Filter</button>
 </form>
-
+<div>
 
 <table border="1">
     <tr>
