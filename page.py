@@ -1310,8 +1310,10 @@ def add_section():
         semester = request.form['semester'].strip()
         year = request.form['year'].strip()
         b_name = request.form['b_name'].strip()
-        room_number = request.form['room_number'].strip()
+        room_number = request.form['room_number'].strip()   
         capacity = request.form.get('capacity') or None
+        days = request.form['days'].strip()
+        time = request.form['time'].strip()
 
         valid_semesters = ['Fall', 'Spring', 'Summer', 'Winter']
         if semester not in valid_semesters:
@@ -1343,9 +1345,9 @@ def add_section():
 
             cursor.execute("""
                 INSERT INTO section
-                    (section_number, course_id, semester, year, b_name, room_number, capacity)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (section_number, course_id, semester, year, b_name, room_number, capacity))
+                    (section_number, course_id, semester, year, b_name, room_number, capacity, days, time)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (section_number, course_id, semester, year, b_name, room_number, capacity, days, time))
 
             connection.commit()
             flash("Section added successfully!")
