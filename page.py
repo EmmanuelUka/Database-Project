@@ -11,7 +11,7 @@ db_config = {
     'host': 'localhost',
     'user': 'root',         
     'password': '',        
-    'database': 'euka'
+    'database': 'project'
 }
 
 
