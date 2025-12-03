@@ -749,23 +749,31 @@ def add_student():
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        data = (
-            request.form['student_id'],    
-            request.form['s_name'],
-            request.form['dept_id'],
-            request.form['tot_credits'],
-            request.form['gpa'],
-            request.form['email'],
-            request.form['address_houseNumber'],
-            request.form['address_street'],
-            request.form['address_city'],
-            request.form['address_state'],
-            request.form['address_zip']
-        )
+        student_id = request.form['student_id']
+        s_name = request.form['s_name']
+        dept_id = request.form['dept_id']
+        tot_credits = request.form['tot_credits']
+        gpa = request.form['gpa']
+        email = request.form['email']
+        house = request.form['address_houseNumber']
+        street = request.form['address_street']
+        city = request.form['address_city']
+        state = request.form['address_state']
+        zip_code = request.form['address_zip']
+
+        default_hashed_password = "$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W"
 
         try:
             connection = mysql.connector.connect(**db_config)
             cursor = connection.cursor()
+
+            connection.start_transaction()
+
+            cursor.execute("""
+                INSERT INTO users (user_id, username, password, role)
+                VALUES (%s, %s, %s, %s)
+            """, (student_id, s_name, default_hashed_password, "student"))
+
             cursor.execute("""
                 INSERT INTO student (
                     student_id, s_name, dept_id, tot_credits, gpa, email,
@@ -773,16 +781,23 @@ def add_student():
                     address_state, address_zip
                 )
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """, data)
+            """, (
+                student_id, s_name, dept_id, tot_credits, gpa, email,
+                house, street, city, state, zip_code
+            ))
             connection.commit()
-            flash("Student added successfully!")
+            flash("Student + User successfully created!")
             return redirect(url_for('manage_students'))
+
+        except mysql.connector.Error as err:
+            connection.rollback()
+            flash(f"Error adding student: {err}")
+
         finally:
             cursor.close()
             connection.close()
 
-    return render_template('add_student.html')
-
+    return render_template('add_student.html') 
 
 @app.route('/admin/students/update/<student_id>', methods=['GET', 'POST'])
 def update_student(student_id):
@@ -899,28 +914,43 @@ def add_professor():
         state = request.form['address_state']
         zipc = request.form['address_zip']
 
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
+        default_hashed_password = "$2b$12$hdmxyuFBJ3M8bjrvuPuEle0BMBMpIiP7j39KuwVeOhvPrwa3yaj1W"
 
-        query = """
-            INSERT INTO professor 
-            (professor_id, p_name, dept_id, salary, email,
-             address_houseNumber, address_street, address_city, address_state, address_zip)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """
+        try:
+            connection = mysql.connector.connect(**db_config)
+            cursor = connection.cursor()
 
-        cursor.execute(query, (professor_id, p_name, dept_id, salary, email,
-                               hn, street, city, state, zipc))
-        connection.commit()
+            connection.start_transaction()
 
-        cursor.close()
-        connection.close()
+            cursor.execute("""
+                INSERT INTO users (user_id, username, password, role)
+                VALUES (%s, %s, %s, %s)
+            """, (professor_id, p_name, default_hashed_password, "professor"))
 
-        flash("Professor added successfully!")
-        return redirect(url_for('manage_professors'))
+            cursor.execute("""
+                INSERT INTO professor (
+                    professor_id, p_name, dept_id, salary, email,
+                    address_houseNumber, address_street, address_city,
+                    address_state, address_zip
+                )
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                professor_id, p_name, dept_id, salary, email,
+                hn, street, city, state, zipc
+            ))
+            connection.commit()
+            flash("Professor + User created successfully!")
+            return redirect(url_for('manage_professors'))
+
+        except mysql.connector.Error as err:
+            connection.rollback()
+            flash(f"Error adding professor: {err}")
+
+        finally:
+            cursor.close()
+            connection.close()
 
     return render_template('add_professor.html')
-
 
 @app.route('/admin/professors/update/<professor_id>', methods=['GET', 'POST'])
 def update_professor(professor_id):
@@ -1855,7 +1885,6 @@ def class_comparison():
         selected=selected
     )
 
-
 @app.route('/instructor/student_counts')
 def student_counts():
     if session.get('role') not in ['admin', 'instructor']:
@@ -1867,23 +1896,31 @@ def student_counts():
 
     cursor.execute("""
         SELECT d.department_id, d.d_name,
-               COUNT(s.student_id) AS current_students
+            COUNT(DISTINCT s.student_id) AS current_students
         FROM department d
         LEFT JOIN student s ON s.dept_id = d.department_id
+        LEFT JOIN takes t ON t.student_id = s.student_id
+        LEFT JOIN section sec ON sec.section_number = t.section_number
+        WHERE sec.year >= 2023
         GROUP BY d.department_id, d.d_name
-        ORDER BY d.d_name
+        ORDER BY d.d_name;
     """)
     current_rows = cursor.fetchall()
 
     cursor.execute("""
         SELECT d.department_id, d.d_name,
-               COUNT(DISTINCT t.student_id) AS past_students
+            COUNT(DISTINCT s.student_id) AS past_students
         FROM department d
-        LEFT JOIN takes t ON TRUE
-        LEFT JOIN student s ON s.student_id = t.student_id
-        WHERE s.student_id IS NULL
+        LEFT JOIN student s ON s.dept_id = d.department_id
+        LEFT JOIN (
+            SELECT t.student_id, MAX(sec.year) AS last_year
+            FROM takes t
+            JOIN section sec ON sec.section_number = t.section_number
+            GROUP BY t.student_id
+        ) AS x ON x.student_id = s.student_id
+        WHERE x.last_year < 2023 OR x.last_year IS NULL
         GROUP BY d.department_id, d.d_name
-        ORDER BY d.d_name
+        ORDER BY d.d_name;
     """)
     past_rows = cursor.fetchall()
 
@@ -1898,7 +1935,6 @@ def student_counts():
         current = row['current_students']
         past = past_map.get(dept_id, 0)
         total = current + past
-
         result.append({
             "department_id": dept_id,
             "d_name": row['d_name'],
